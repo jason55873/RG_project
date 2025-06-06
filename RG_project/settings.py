@@ -88,8 +88,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "OPTIONS": {
-            "service": "RGservice",
-            "passfile": ".pgpass",
+            "service": "RGservice"
         },
     }
 }
