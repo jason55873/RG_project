@@ -1,0 +1,50 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}{% trans "My Site" %}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />
+  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
+</head>
+
+<body>
+  <nav class="container mt-3">
+     <div class="d-flex justify-content-end align-items-center gap-3">
+      <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()" class="form-select form-select-sm w-auto">
+          <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+          <option value="zh-hant" {% if LANGUAGE_CODE == 'zh-hant' %}selected{% endif %}>繁體中文</option>
+        </select>
+        <input type="hidden" name="next" value="{{ request.path }}">
+      </form>
+  
+      <!-- 登出按鈕，只有登入時才顯示 -->
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" class="mb-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">{% trans "Logout" %}</button>
+        </form>
+        {% endif %}
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    {% block content %}
+    <!-- 子樣板內容會插在這 -->
+    {% endblock %}
+  </div>
+
+  <footer class="text-center mt-4 mb-2">
+    <small>&copy; 2025</small>
+  </footer>
+
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+
+</html>

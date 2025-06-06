@@ -1,0 +1,118 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-04 22:51+0800\n"
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#: common/models.py:6
+msgid "Employee ID"
+msgstr "Employee ID"
+
+#: common/models.py:7
+msgid "Chinese Name"
+msgstr "Chinese Name"
+
+#: common/models.py:10
+msgid "Male"
+msgstr "Male"
+
+#: common/models.py:10
+msgid "Female"
+msgstr "Female"
+
+#: common/models.py:11
+msgid "Gender"
+msgstr "Gender"
+
+#: common/models.py:13
+msgid "English Name"
+msgstr "English Name"
+
+#: common/models.py:21
+msgid "Date of Birth"
+msgstr "Date of Birth"
+
+#: common/models.py:22
+msgid "Military Status"
+msgstr "Military Status"
+
+#: common/models.py:23
+msgid "National ID"
+msgstr "Citizen ID Number"
+
+#: common/models.py:24
+msgid "Hire Date"
+msgstr "Date of Hire"
+
+#: common/models.py:25
+msgid "Resignation Date"
+msgstr "Date of Resignation"
+
+#: common/models.py:26
+msgid "Title (Chinese)"
+msgstr "Job Title (Chinese)"
+
+#: common/models.py:27
+msgid "Title (English)"
+msgstr "Job Title (English)"
+
+#: common/models.py:28
+msgid "Department"
+msgstr "Department"
+
+#: common/models.py:34
+msgid "Blood Type"
+msgstr "Blood Type"
+
+#: common/models.py:40
+msgid "Email"
+msgstr "Email"
+
+#: common/models.py:41
+msgid "Contact Address"
+msgstr "Mailing Address"
+
+#: common/models.py:42
+msgid "Household Address"
+msgstr "Permanent Address"
+
+#: common/models.py:43
+msgid "Mobile Phone"
+msgstr "Mobile Phone"
+
+#: common/models.py:44
+msgid "Telephone"
+msgstr "Landline"
+
+#: common/models.py:46
+msgid "Emergency Contact Name"
+msgstr "Emergency Contact Name"
+
+#: common/models.py:47
+msgid "Emergency Contact Address"
+msgstr "Emergency Contact Address"
+
+#: common/models.py:48
+msgid "Emergency Contact Mobile"
+msgstr "Emergency Contact Mobile"
+
+#: common/models.py:49
+msgid "Emergency Contact Telephone"
+msgstr "Emergency Contact Landline"
+
+#: templates/accounts/login.html:6 templates/accounts/login.html:27
+msgid "Login"
+msgstr ""
+
+#: templates/accounts/login.html:9
+msgid "User Login"
+msgstr ""
+
+#: templates/accounts/login.html:21
+msgid "Username"
+msgstr ""
+
+#: templates/accounts/login.html:24
+msgid "Password"
+msgstr ""

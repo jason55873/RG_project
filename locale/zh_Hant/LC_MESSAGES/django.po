@@ -1,0 +1,118 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-04 22:52+0800\n"
+"Language: zh_Hant\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#: common/models.py:6
+msgid "Employee ID"
+msgstr "人員編號"
+
+#: common/models.py:7
+msgid "Chinese Name"
+msgstr "人員姓名"
+
+#: common/models.py:10
+msgid "Male"
+msgstr "男"
+
+#: common/models.py:10
+msgid "Female"
+msgstr "女"
+
+#: common/models.py:11
+msgid "Gender"
+msgstr "性別"
+
+#: common/models.py:13
+msgid "English Name"
+msgstr "英文姓名"
+
+#: common/models.py:21
+msgid "Date of Birth"
+msgstr "出生日期"
+
+#: common/models.py:22
+msgid "Military Status"
+msgstr "兵役"
+
+#: common/models.py:23
+msgid "National ID"
+msgstr "身分證號"
+
+#: common/models.py:24
+msgid "Hire Date"
+msgstr "到職日期"
+
+#: common/models.py:25
+msgid "Resignation Date"
+msgstr "離職日期"
+
+#: common/models.py:26
+msgid "Title (Chinese)"
+msgstr "中文職稱"
+
+#: common/models.py:27
+msgid "Title (English)"
+msgstr "英文職稱"
+
+#: common/models.py:28
+msgid "Department"
+msgstr "所屬部門"
+
+#: common/models.py:34
+msgid "Blood Type"
+msgstr "血型"
+
+#: common/models.py:40
+msgid "Email"
+msgstr "電子郵件"
+
+#: common/models.py:41
+msgid "Contact Address"
+msgstr "聯絡地址"
+
+#: common/models.py:42
+msgid "Household Address"
+msgstr "戶籍地址"
+
+#: common/models.py:43
+msgid "Mobile Phone"
+msgstr "行動電話"
+
+#: common/models.py:44
+msgid "Telephone"
+msgstr "市話"
+
+#: common/models.py:46
+msgid "Emergency Contact Name"
+msgstr "緊急聯絡人"
+
+#: common/models.py:47
+msgid "Emergency Contact Address"
+msgstr "緊急聯絡人地址"
+
+#: common/models.py:48
+msgid "Emergency Contact Mobile"
+msgstr "緊急聯絡人電話"
+
+#: common/models.py:49
+msgid "Emergency Contact Telephone"
+msgstr "緊急聯絡人市話"
+
+#: templates/accounts/login.html:6 templates/accounts/login.html:27
+msgid "Login"
+msgstr "登入"
+
+#: templates/accounts/login.html:9
+msgid "User Login"
+msgstr "使用者登入"
+
+#: templates/accounts/login.html:21
+msgid "Username"
+msgstr "帳號"
+
+#: templates/accounts/login.html:24
+msgid "Password"
+msgstr "密碼"
