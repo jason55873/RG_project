@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 22:51+0800\n"
+"POT-Creation-Date: 2025-06-07 01:45+0800\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -21,11 +21,11 @@ msgstr "Male"
 msgid "Female"
 msgstr "Female"
 
-#: common/models.py:11
+#: common/models.py:11 templates/employees/employee_list.html:16
 msgid "Gender"
 msgstr "Gender"
 
-#: common/models.py:13
+#: common/models.py:13 templates/employees/employee_list.html:17
 msgid "English Name"
 msgstr "English Name"
 
@@ -101,18 +101,126 @@ msgstr "Emergency Contact Mobile"
 msgid "Emergency Contact Telephone"
 msgstr "Emergency Contact Landline"
 
-#: templates/accounts/login.html:6 templates/accounts/login.html:27
+#: templates/accounts/login.html:4 templates/accounts/login.html:11
+#: templates/accounts/login.html:41
 msgid "Login"
 msgstr ""
 
-#: templates/accounts/login.html:9
+#: templates/accounts/login.html:20
 msgid "User Login"
 msgstr ""
 
-#: templates/accounts/login.html:21
+#: templates/accounts/login.html:33
 msgid "Username"
 msgstr ""
 
-#: templates/accounts/login.html:24
+#: templates/accounts/login.html:37
 msgid "Password"
 msgstr ""
+
+#: templates/base.html:9
+msgid "My Site"
+msgstr ""
+
+#: templates/base.html:31
+msgid "Logout"
+msgstr ""
+
+#: templates/employees/employee_add.html:4
+#: templates/employees/employee_edit.html:4
+#: templates/employees/employee_list.html:4
+#: templates/employees/employee_list.html:7
+#, fuzzy
+#| msgid "Employee ID"
+msgid "Employee List"
+msgstr "Employee ID"
+
+#: templates/employees/employee_add.html:7
+#: templates/employees/employee_edit.html:7
+#: templates/employees/employee_list.html:9
+#, fuzzy
+#| msgid "Employee ID"
+msgid "Add Employee"
+msgstr "Employee ID"
+
+#: templates/employees/employee_add.html:12
+#: templates/employees/employee_edit.html:12
+msgid "Basic Information"
+msgstr ""
+
+#: templates/employees/employee_add.html:17
+#: templates/employees/employee_edit.html:17
+msgid "Profile"
+msgstr ""
+
+#: templates/employees/employee_add.html:22
+#: templates/employees/employee_edit.html:22
+#, fuzzy
+#| msgid "Contact Address"
+msgid "Contact"
+msgstr "Mailing Address"
+
+#: templates/employees/employee_add.html:26
+#: templates/employees/employee_edit.html:26
+msgid "Add"
+msgstr ""
+
+#: templates/employees/employee_add.html:27
+#: templates/employees/employee_confirm_delete.html:14
+#: templates/employees/employee_edit.html:27
+msgid "Cancel"
+msgstr ""
+
+#: templates/employees/employee_confirm_delete.html:4
+#: templates/employees/employee_confirm_delete.html:8
+#, fuzzy
+#| msgid "Employee ID"
+msgid "Delete Employee"
+msgstr "Employee ID"
+
+#: templates/employees/employee_confirm_delete.html:9
+msgid "Are you sure you want to delete"
+msgstr ""
+
+#: templates/employees/employee_confirm_delete.html:13
+#: templates/employees/employee_list.html:35
+msgid "Delete"
+msgstr ""
+
+#: templates/employees/employee_list.html:14
+msgid "ID"
+msgstr ""
+
+#: templates/employees/employee_list.html:15
+msgid "Name"
+msgstr ""
+
+#: templates/employees/employee_list.html:18
+msgid "Actions"
+msgstr ""
+
+#: templates/employees/employee_list.html:29
+msgid "Edit"
+msgstr ""
+
+#: templates/employees/employee_list.html:33
+msgid "Are you sure you want to delete this employee?"
+msgstr ""
+
+#: templates/home.html:4
+msgid "Home"
+msgstr ""
+
+#: templates/home.html:9
+msgid "Welcome"
+msgstr ""
+
+#: templates/home.html:10
+msgid "You have successfully logged in."
+msgstr ""
+
+#: templates/home.html:14
+#, fuzzy
+#| msgid "Employee ID"
+msgid "Go to Employee List"
+msgstr "Employee ID"

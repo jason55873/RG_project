@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 22:52+0800\n"
+"POT-Creation-Date: 2025-06-07 01:45+0800\n"
 "Language: zh_Hant\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -21,11 +21,11 @@ msgstr "男"
 msgid "Female"
 msgstr "女"
 
-#: common/models.py:11
+#: common/models.py:11 templates/employees/employee_list.html:16
 msgid "Gender"
 msgstr "性別"
 
-#: common/models.py:13
+#: common/models.py:13 templates/employees/employee_list.html:17
 msgid "English Name"
 msgstr "英文姓名"
 
@@ -101,18 +101,116 @@ msgstr "緊急聯絡人電話"
 msgid "Emergency Contact Telephone"
 msgstr "緊急聯絡人市話"
 
-#: templates/accounts/login.html:6 templates/accounts/login.html:27
+#: templates/accounts/login.html:4 templates/accounts/login.html:11
+#: templates/accounts/login.html:41
 msgid "Login"
 msgstr "登入"
 
-#: templates/accounts/login.html:9
+#: templates/accounts/login.html:20
 msgid "User Login"
 msgstr "使用者登入"
 
-#: templates/accounts/login.html:21
+#: templates/accounts/login.html:33
 msgid "Username"
 msgstr "帳號"
 
-#: templates/accounts/login.html:24
+#: templates/accounts/login.html:37
 msgid "Password"
 msgstr "密碼"
+
+#: templates/base.html:9
+msgid "My Site"
+msgstr "我的網站"
+
+#: templates/base.html:31
+msgid "Logout"
+msgstr "登出"
+
+#: templates/employees/employee_add.html:4
+#: templates/employees/employee_edit.html:4
+#: templates/employees/employee_list.html:4
+#: templates/employees/employee_list.html:7
+msgid "Employee List"
+msgstr "員工列表"
+
+#: templates/employees/employee_add.html:7
+#: templates/employees/employee_edit.html:7
+#: templates/employees/employee_list.html:9
+msgid "Add Employee"
+msgstr "新增員工"
+
+#: templates/employees/employee_add.html:12
+#: templates/employees/employee_edit.html:12
+msgid "Basic Information"
+msgstr "基本資料"
+
+#: templates/employees/employee_add.html:17
+#: templates/employees/employee_edit.html:17
+msgid "Profile"
+msgstr "個人資料"
+
+#: templates/employees/employee_add.html:22
+#: templates/employees/employee_edit.html:22
+msgid "Contact"
+msgstr "聯絡資料"
+
+#: templates/employees/employee_add.html:26
+#: templates/employees/employee_edit.html:26
+msgid "Add"
+msgstr "新增"
+
+#: templates/employees/employee_add.html:27
+#: templates/employees/employee_confirm_delete.html:14
+#: templates/employees/employee_edit.html:27
+msgid "Cancel"
+msgstr "取消"
+
+#: templates/employees/employee_confirm_delete.html:4
+#: templates/employees/employee_confirm_delete.html:8
+msgid "Delete Employee"
+msgstr "刪除員工"
+
+#: templates/employees/employee_confirm_delete.html:9
+msgid "Are you sure you want to delete"
+msgstr "你確定要刪除"
+
+#: templates/employees/employee_confirm_delete.html:13
+#: templates/employees/employee_list.html:35
+msgid "Delete"
+msgstr "刪除"
+
+#: templates/employees/employee_list.html:14
+msgid "ID"
+msgstr "編號"
+
+#: templates/employees/employee_list.html:15
+msgid "Name"
+msgstr "姓名"
+
+#: templates/employees/employee_list.html:18
+msgid "Actions"
+msgstr "操作"
+
+#: templates/employees/employee_list.html:29
+msgid "Edit"
+msgstr "編輯"
+
+#: templates/employees/employee_list.html:33
+msgid "Are you sure you want to delete this employee?"
+msgstr "你確定要刪除此員工嗎？"
+
+#: templates/home.html:4
+msgid "Home"
+msgstr "首頁"
+
+#: templates/home.html:9
+msgid "Welcome"
+msgstr "歡迎"
+
+#: templates/home.html:10
+msgid "You have successfully logged in."
+msgstr "您已成功登入。"
+
+#: templates/home.html:14
+msgid "Go to Employee List"
+msgstr "前往員工列表"

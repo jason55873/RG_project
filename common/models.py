@@ -16,6 +16,18 @@ class Employee(models.Model):
         return f"{self.employee_id} - {self.name_chinese}"
 
 
+class Department(models.Model):
+    code = models.CharField(max_length=20, unique=True, verbose_name=_("Department Code"))
+    name = models.CharField(max_length=100, verbose_name=_("Department Name"))
+    name_en = models.CharField(max_length=100, verbose_name=_("Department English Name"))
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='sub_departments', verbose_name=_("Parent Department"))
+    note = models.TextField(blank=True, verbose_name=_("Note"))
+    is_disabled = models.BooleanField(default=False, verbose_name=_("Disabled"))
+
+    def __str__(self):
+        return self.name
+
+
 class EmployeeProfile(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.CASCADE, related_name='profile')
     date_of_birth = models.DateField(verbose_name=_("Date of Birth"))
@@ -25,7 +37,7 @@ class EmployeeProfile(models.Model):
     resignation_date = models.DateField(null=True, blank=True, verbose_name=_("Resignation Date"))
     title_chinese = models.CharField(max_length=50, verbose_name=_("Title (Chinese)"))
     title_english = models.CharField(max_length=100, verbose_name=_("Title (English)"))
-    department = models.CharField(max_length=100, verbose_name=_("Department"))
+    department = models.ForeignKey(Department, null=True, blank=True, on_delete=models.SET_NULL, verbose_name=_("Department"))
     blood_type = models.CharField(
         max_length=3,
         choices=[
