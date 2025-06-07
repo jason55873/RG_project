@@ -1,226 +1,314 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-07 01:45+0800\n"
-"Language: en\n"
+"POT-Creation-Date: 2025-06-07 19:26+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: common/models.py:6
-msgid "Employee ID"
+#: common/models.py:9 templates/employees/employee_form.html:23
+#: templates/login.html:38
+msgid "帳號"
+msgstr "Username"
+
+#: common/models.py:10
+msgid "人員編號"
 msgstr "Employee ID"
 
-#: common/models.py:7
-msgid "Chinese Name"
+#: common/models.py:11
+msgid "人員姓名"
 msgstr "Chinese Name"
 
-#: common/models.py:10
-msgid "Male"
+#: common/models.py:14
+msgid "男"
 msgstr "Male"
 
-#: common/models.py:10
-msgid "Female"
+#: common/models.py:14
+msgid "女"
 msgstr "Female"
 
-#: common/models.py:11 templates/employees/employee_list.html:16
-msgid "Gender"
+#: common/models.py:15 templates/employees/employee_list.html:16
+msgid "性別"
 msgstr "Gender"
 
-#: common/models.py:13 templates/employees/employee_list.html:17
-msgid "English Name"
+#: common/models.py:17 templates/employees/employee_list.html:17
+msgid "英文姓名"
 msgstr "English Name"
 
-#: common/models.py:21
-msgid "Date of Birth"
-msgstr "Date of Birth"
-
-#: common/models.py:22
-msgid "Military Status"
-msgstr "Military Status"
-
-#: common/models.py:23
-msgid "National ID"
-msgstr "Citizen ID Number"
-
-#: common/models.py:24
-msgid "Hire Date"
-msgstr "Date of Hire"
+#: common/models.py:18 common/models.py:31
+#: templates/departments/department_list.html:33
+#: templates/employees/employee_list.html:35
+msgid "刪除"
+msgstr "Delete"
 
 #: common/models.py:25
-msgid "Resignation Date"
-msgstr "Date of Resignation"
+msgid "部門編號"
+msgstr "Department Code"
 
 #: common/models.py:26
-msgid "Title (Chinese)"
-msgstr "Job Title (Chinese)"
+msgid "部門名稱"
+msgstr "Department Name"
 
 #: common/models.py:27
-msgid "Title (English)"
-msgstr "Job Title (English)"
+msgid "部門英文名稱"
+msgstr "Department English Name"
 
-#: common/models.py:28
-msgid "Department"
+#: common/models.py:28 templates/departments/department_list.html:13
+msgid "上層部門"
+msgstr "Parent Department"
+
+#: common/models.py:29
+msgid "備註"
+msgstr "Note"
+
+#: common/models.py:30 templates/departments/department_list.html:14
+msgid "停用"
+msgstr "Disabled"
+
+#: common/models.py:51
+msgid "出生日期"
+msgstr "Date of Birth"
+
+#: common/models.py:52
+msgid "兵役"
+msgstr "Military Status"
+
+#: common/models.py:53
+msgid "身分證號"
+msgstr "National ID"
+
+#: common/models.py:54
+msgid "到職日期"
+msgstr "Hire Date"
+
+#: common/models.py:55
+msgid "離職日期"
+msgstr "Resignation Date"
+
+#: common/models.py:56
+msgid "中文職稱"
+msgstr "Title (Chinese)"
+
+#: common/models.py:57
+msgid "英文職稱"
+msgstr "Title (English)"
+
+#: common/models.py:58
+msgid "所屬部門"
 msgstr "Department"
 
-#: common/models.py:34
-msgid "Blood Type"
+#: common/models.py:64
+msgid "血型"
 msgstr "Blood Type"
 
-#: common/models.py:40
+#: common/models.py:72
 msgid "Email"
 msgstr "Email"
 
-#: common/models.py:41
-msgid "Contact Address"
-msgstr "Mailing Address"
+#: common/models.py:73
+msgid "聯絡地址"
+msgstr "Contact Address"
 
-#: common/models.py:42
-msgid "Household Address"
-msgstr "Permanent Address"
+#: common/models.py:74
+msgid "戶籍地址"
+msgstr "Household Address"
 
-#: common/models.py:43
-msgid "Mobile Phone"
+#: common/models.py:75
+msgid "行動電話"
 msgstr "Mobile Phone"
 
-#: common/models.py:44
-msgid "Telephone"
-msgstr "Landline"
+#: common/models.py:76
+msgid "市話"
+msgstr "Telephone"
 
-#: common/models.py:46
-msgid "Emergency Contact Name"
-msgstr "Emergency Contact Name"
+#: common/models.py:78
+msgid "緊急聯絡人"
+msgstr "Emergency Contact"
 
-#: common/models.py:47
-msgid "Emergency Contact Address"
+#: common/models.py:79
+msgid "緊急聯絡人地址"
 msgstr "Emergency Contact Address"
 
-#: common/models.py:48
-msgid "Emergency Contact Mobile"
+#: common/models.py:80
+msgid "緊急聯絡人電話"
 msgstr "Emergency Contact Mobile"
 
-#: common/models.py:49
-msgid "Emergency Contact Telephone"
-msgstr "Emergency Contact Landline"
-
-#: templates/accounts/login.html:4 templates/accounts/login.html:11
-#: templates/accounts/login.html:41
-msgid "Login"
-msgstr ""
-
-#: templates/accounts/login.html:20
-msgid "User Login"
-msgstr ""
-
-#: templates/accounts/login.html:33
-msgid "Username"
-msgstr ""
-
-#: templates/accounts/login.html:37
-msgid "Password"
-msgstr ""
+#: common/models.py:81
+msgid "緊急聯絡人市話"
+msgstr "Emergency Contact Telephone"
 
 #: templates/base.html:9
-msgid "My Site"
-msgstr ""
+msgid "我的網站"
+msgstr "My Site"
 
-#: templates/base.html:31
-msgid "Logout"
-msgstr ""
+#: templates/base.html:23 templates/base.html:24
+msgid "共用管理"
+msgstr "Shared Management"
 
-#: templates/employees/employee_add.html:4
-#: templates/employees/employee_edit.html:4
+#: templates/base.html:28
+msgid "基本資料設定"
+msgstr "Basic Data Settings"
+
+#: templates/base.html:32
+msgid "人員資料"
+msgstr "Employee Data"
+
+#: templates/base.html:37
+msgid "部門資料"
+msgstr "Department Data"
+
+#: templates/base.html:48 templates/home.html:4
+msgid "首頁"
+msgstr "Home"
+
+#: templates/base.html:53
+msgid "語言"
+msgstr "Language"
+
+#: templates/base.html:78
+msgid "登出"
+msgstr "Logout"
+
+#: templates/departments/department_confirm_delete.html:5
+msgid "確認刪除部門"
+msgstr "Confirm Delete Department"
+
+#: templates/departments/department_confirm_delete.html:6
+#: templates/departments/department_list.html:31
+msgid "你確定要刪除此部門嗎？"
+msgstr "Are you sure you want to delete this department?"
+
+#: templates/departments/department_confirm_delete.html:12
+msgid "確認刪除"
+msgstr "Confirm Delete"
+
+#: templates/departments/department_confirm_delete.html:13
+#: templates/departments/department_form.html:42
+#: templates/employees/employee_form.html:96
+msgid "取消"
+msgstr "Cancel"
+
+#: templates/departments/department_form.html:9
+msgid "部門表單"
+msgstr "Department Form"
+
+#: templates/departments/department_form.html:22
+msgid "部門資訊"
+msgstr "Department Information"
+
+#: templates/departments/department_form.html:45
+#: templates/employees/employee_form.html:99
+msgid "修改"
+msgstr "Update"
+
+#: templates/departments/department_form.html:47
+#: templates/employees/employee_form.html:101
+msgid "新增"
+msgstr "Add"
+
+#: templates/departments/department_list.html:5
+msgid "部門列表"
+msgstr "Department List"
+
+#: templates/departments/department_list.html:6
+msgid "新增部門"
+msgstr "Add Department"
+
+#: templates/departments/department_list.html:10
+#: templates/employees/employee_list.html:14
+msgid "編號"
+msgstr "Code"
+
+#: templates/departments/department_list.html:11
+msgid "名稱"
+msgstr "Name"
+
+#: templates/departments/department_list.html:12
+msgid "英文名稱"
+msgstr "English Name"
+
+#: templates/departments/department_list.html:27
+#: templates/employees/employee_list.html:29
+msgid "編輯"
+msgstr "Edit"
+
+#: templates/departments/department_list.html:38
+msgid "查無部門資料。"
+msgstr "No departments found."
+
+#: templates/employees/employee_form.html:4
+msgid "員工列表"
+msgstr "Employee List"
+
+#: templates/employees/employee_form.html:12
+msgid "新增員工"
+msgstr "Add Employee"
+
+#: templates/employees/employee_form.html:19
+msgid "基本資料"
+msgstr "Basic Information"
+
+#: templates/employees/employee_form.html:53
+msgid "個人資料"
+msgstr "Profile"
+
+#: templates/employees/employee_form.html:75
+msgid "聯絡資料"
+msgstr "Contact Information"
+
 #: templates/employees/employee_list.html:4
 #: templates/employees/employee_list.html:7
-#, fuzzy
-#| msgid "Employee ID"
-msgid "Employee List"
-msgstr "Employee ID"
+msgid "人員列表"
+msgstr "Employee List"
 
-#: templates/employees/employee_add.html:7
-#: templates/employees/employee_edit.html:7
 #: templates/employees/employee_list.html:9
-#, fuzzy
-#| msgid "Employee ID"
-msgid "Add Employee"
-msgstr "Employee ID"
-
-#: templates/employees/employee_add.html:12
-#: templates/employees/employee_edit.html:12
-msgid "Basic Information"
-msgstr ""
-
-#: templates/employees/employee_add.html:17
-#: templates/employees/employee_edit.html:17
-msgid "Profile"
-msgstr ""
-
-#: templates/employees/employee_add.html:22
-#: templates/employees/employee_edit.html:22
-#, fuzzy
-#| msgid "Contact Address"
-msgid "Contact"
-msgstr "Mailing Address"
-
-#: templates/employees/employee_add.html:26
-#: templates/employees/employee_edit.html:26
-msgid "Add"
-msgstr ""
-
-#: templates/employees/employee_add.html:27
-#: templates/employees/employee_confirm_delete.html:14
-#: templates/employees/employee_edit.html:27
-msgid "Cancel"
-msgstr ""
-
-#: templates/employees/employee_confirm_delete.html:4
-#: templates/employees/employee_confirm_delete.html:8
-#, fuzzy
-#| msgid "Employee ID"
-msgid "Delete Employee"
-msgstr "Employee ID"
-
-#: templates/employees/employee_confirm_delete.html:9
-msgid "Are you sure you want to delete"
-msgstr ""
-
-#: templates/employees/employee_confirm_delete.html:13
-#: templates/employees/employee_list.html:35
-msgid "Delete"
-msgstr ""
-
-#: templates/employees/employee_list.html:14
-msgid "ID"
-msgstr ""
+msgid "新增人員"
+msgstr "Add Employee"
 
 #: templates/employees/employee_list.html:15
-msgid "Name"
-msgstr ""
+msgid "姓名"
+msgstr "Name"
 
 #: templates/employees/employee_list.html:18
-msgid "Actions"
-msgstr ""
-
-#: templates/employees/employee_list.html:29
-msgid "Edit"
-msgstr ""
+msgid "操作"
+msgstr "Actions"
 
 #: templates/employees/employee_list.html:33
-msgid "Are you sure you want to delete this employee?"
-msgstr ""
+msgid "你確定要刪除此人員嗎？"
+msgstr "Are you sure you want to delete this employee?"
 
-#: templates/home.html:4
-msgid "Home"
-msgstr ""
+#: templates/home.html:14 templates/home.html:16
+msgid "歡迎"
+msgstr "Welcome"
 
-#: templates/home.html:9
-msgid "Welcome"
-msgstr ""
+#: templates/home.html:19
+msgid "您已成功登入。"
+msgstr "You have successfully logged in."
 
-#: templates/home.html:10
-msgid "You have successfully logged in."
-msgstr ""
+#: templates/home.html:20
+msgid "歡迎使用立鉅ERP系統。"
+msgstr "Welcome to RIDGE ERP System."
 
-#: templates/home.html:14
-#, fuzzy
-#| msgid "Employee ID"
-msgid "Go to Employee List"
-msgstr "Employee ID"
+#: templates/login.html:4 templates/login.html:11 templates/login.html:46
+msgid "登入"
+msgstr "Login"
+
+#: templates/login.html:25
+msgid "使用者登入"
+msgstr "User Login"
+
+#: templates/login.html:42
+msgid "密碼"
+msgstr "Password"

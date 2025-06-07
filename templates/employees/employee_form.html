@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Employee List" %}{% endblock %}
+{% block title %}{% trans "員工列表" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -9,19 +9,33 @@
     <div class="col-md-10 col-lg-8">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">{% trans "Add Employee" %}</h2>
+          <h2 class="mb-0">{% trans "新增員工" %}</h2>
         </div>
         <div class="card-body">
           <form method="post">
             {% csrf_token %}
 
             <fieldset class="mb-4">
-              <legend class="h5">{% trans "Basic Information" %}</legend>
+              <legend class="h5">{% trans "基本資料" %}</legend>
               <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="row align-items-center">
+                    <label for="id_username" class="col-sm-4 col-form-label">{% trans "帳號" %}</label>
+                    <div class="col-sm-8">
+                      {% if form.instance.pk %}
+                        <input type="text" name="username" id="id_username" class="form-control" value="{{ username }}" readonly>
+                      {% else %}
+                        <input type="text" name="username" id="id_username" class="form-control" value="{{ username }}" required>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
                 {% for field in form %}
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
-                    <label class="col-sm-4 col-form-label">{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label {% if field.field.required %}required{% endif %}">
+                      {{ field.label }}
+                    </label>
                     <div class="col-sm-8">
                       {{ field }}
                       {% if field.errors %}
@@ -36,12 +50,14 @@
             <hr class="my-4">
 
             <fieldset class="mb-4">
-              <legend class="h5">{% trans "Profile" %}</legend>
+              <legend class="h5">{% trans "個人資料" %}</legend>
               <div class="row">
                 {% for field in profile_form %}
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
-                    <label class="col-sm-4 col-form-label">{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label {% if field.field.required %}required{% endif %}">
+                      {{ field.label }}
+                    </label>
                     <div class="col-sm-8">
                       {{ field }}
                       {% if field.errors %}
@@ -56,12 +72,14 @@
             <hr class="my-4">
 
             <fieldset class="mb-4">
-              <legend class="h5">{% trans "Contact" %}</legend>
+              <legend class="h5">{% trans "聯絡資料" %}</legend>
               <div class="row">
                 {% for field in contact_form %}
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
-                    <label class="col-sm-4 col-form-label">{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label {% if field.field.required %}required{% endif %}">
+                      {{ field.label }}
+                    </label>
                     <div class="col-sm-8">
                       {{ field }}
                       {% if field.errors %}
@@ -75,8 +93,14 @@
             </fieldset>
 
             <div class="d-flex justify-content-between">
-              <a href="{% url 'employee_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
-              <button type="submit" class="btn btn-success">{% trans "Add" %}</button>
+              <a href="{% url 'employee_list' %}" class="btn btn-secondary">{% trans "取消" %}</a>
+              <button type="submit" class="btn btn-success">
+                {% if form.instance.pk %}
+                  {% trans "修改" %}
+                {% else %}
+                  {% trans "新增" %}
+                {% endif %}
+              </button>
             </div>
           </form>
         </div>

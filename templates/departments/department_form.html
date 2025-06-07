@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">{% trans "部門表單" %}</h2>
+        </div>
+        <div class="card-body">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-danger" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="post">
+            {% csrf_token %}
+            <fieldset class="mb-4">
+              <legend class="h5">{% trans "部門資訊" %}</legend>
+              <div class="row">
+                {% for field in form %}
+                <div class="{% if field.name == 'note' %}col-12{% else %}col-md-6{% endif %} mb-3">
+                  <div class="row align-items-center">
+                    <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label {% if field.field.required %}required{% endif %}">
+                      {{ field.label }}
+                    </label>
+                    <div class="col-sm-8">
+                      {{ field }}
+                      {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </fieldset>
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{% url 'department_list' %}" class="btn btn-secondary">{% trans "取消" %}</a>
+              <button type="submit" class="btn btn-success">
+                {% if form.instance.pk %}
+                  {% trans "修改" %}
+                {% else %}
+                  {% trans "新增" %}
+                {% endif %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

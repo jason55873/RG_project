@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Home" %}{% endblock %}
+{% block title %}{% trans "首頁" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -9,9 +9,15 @@
     <div class="col-md-8 col-lg-6">
       <div class="card shadow-sm">
         <div class="card-body text-center">
-          <h1 class="text-primary">{% trans "Welcome" %}, {{ user.username }}!</h1>
-          <p class="lead">{% trans "You have successfully logged in." %}</p>
-          <p class="lead">{% trans "Welcome to RIDGE ERP System." %}</p>
+          {% with user.employee.name_chinese as display_name %}
+            {% if display_name %}
+              <h1 class="text-primary">{% trans "歡迎" %}, {{ display_name }}!</h1>
+            {% else %}
+              <h1 class="text-primary">{% trans "歡迎" %}, {{ user.username }}!</h1>
+            {% endif %}
+          {% endwith %}
+          <p class="lead">{% trans "您已成功登入。" %}</p>
+          <p class="lead">{% trans "歡迎使用立鉅ERP系統。" %}</p>
         </div>
       </div>
     </div>

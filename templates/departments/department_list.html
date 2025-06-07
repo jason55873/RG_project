@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{% trans "部門列表" %}</h2>
+  <a href="{% url 'department_create' %}" class="btn btn-success mb-3">{% trans "新增部門" %}</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>{% trans "編號" %}</th>
+        <th>{% trans "名稱" %}</th>
+        <th>{% trans "英文名稱" %}</th>
+        <th>{% trans "上層部門" %}</th>
+        <th>{% trans "停用" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dept in departments %}
+        <tr>
+          <td>{{ dept.code }}</td>
+          <td>{% if dept.name %}{{ dept.name }}{% endif %}</td>
+          <td>{% if dept.name_en %}{{ dept.name_en }}{% endif %}</td>
+          <td>{% if dept.parent %}{{ dept.parent.name }}{% endif %}</td>
+          <td>{{ dept.is_disabled|yesno:"✔," }}</td>
+          <td>
+            <a href="{% url 'department_update' dept.pk %}" class="btn btn-sm btn-primary">{% trans "編輯" %}</a>
+            <form method="post"
+                  action="{% url 'department_delete' dept.pk %}"
+                  style="display:inline;"
+                  onsubmit="return confirm('{% blocktrans %}你確定要刪除此部門嗎？{% endblocktrans %}')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger">{% trans "刪除" %}</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% trans "查無部門資料。" %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

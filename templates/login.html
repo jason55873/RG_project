@@ -1,15 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Login" %}{% endblock %}
+{% block title %}{% trans "登入" %}{% endblock %}
 
 {% block content %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
-    <title>{% trans "Login" %}</title>
+    <title>{% trans "登入" %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if user.is_authenticated %}
+    <script>
+      window.location.href = "{% url 'home' %}";
+    </script>
+    {% endif %}
 </head>
 <body class="bg-light">
     <div class="container">
@@ -17,7 +22,7 @@
             <div class="col-md-4">
                 <div class="card shadow rounded">
                     <div class="card-body">
-                        <h3 class="card-title text-center mb-4">{% trans "User Login" %}</h3>
+                        <h3 class="card-title text-center mb-4">{% trans "使用者登入" %}</h3>
 
                         {% if messages %}
                             {% for message in messages %}
@@ -30,15 +35,15 @@
                         <form method="post">
                             {% csrf_token %}
                             <div class="mb-3">
-                                <label for="id_username" class="form-label">{% trans "Username" %}</label>
+                                <label for="id_username" class="form-label">{% trans "帳號" %}</label>
                                 <input type="text" name="username" id="id_username" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="id_password" class="form-label">{% trans "Password" %}</label>
+                                <label for="id_password" class="form-label">{% trans "密碼" %}</label>
                                 <input type="password" name="password" id="id_password" class="form-control" required>
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+                                <button type="submit" class="btn btn-primary">{% trans "登入" %}</button>
                             </div>
                         </form>
                     </div>
