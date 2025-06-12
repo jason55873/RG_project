@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{% if is_edit %}編輯產品{% else %}新增產品{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                產品基本資料
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for field in form %}
+                        {% if field.name not in "msrp price_a price_b price_c price_d price_e standard_cost cost_rmb cost_usd currency package1_qty package1_unit package2_qty package2_unit" %}
+                        <div class="col-md-6 mb-3">
+                            <div class="row align-items-center">
+                                <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label">{{ field.label }}</label>
+                                <div class="col-sm-8">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="col-md-6 mb-3">
+                        <div class="row align-items-center">
+                            <label for="{{ form.unit.id_for_label }}" class="col-sm-4 col-form-label">計量單位</label>
+                            <div class="col-sm-8">
+                                {{ form.unit }}
+                                {% if form.unit.errors %}
+                                    <div class="text-danger small">{{ form.unit.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">包裝1 單位轉換</label>
+                        <div class="input-group">
+                            {{ form.package1_qty }}
+                            <span class="input-group-text" id="unit_label_1">{{ form.unit.value|default:"計量單位" }}</span>
+                            <span class="input-group-text">=</span>
+                            <span class="input-group-text">1</span>
+                            {{ form.package1_unit }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">包裝2 單位轉換</label>
+                        <div class="input-group">
+                            {{ form.package2_qty }}
+                            <span class="input-group-text" id="unit_label_2">{{ form.package1_unit.value|default:"包裝1單位" }}</span>
+                            <span class="input-group-text">=</span>
+                            <span class="input-group-text">1</span>
+                            {{ form.package2_unit }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                商品型號（變化）
+            </div>
+            {{ formset.management_form }}
+            <div class="card-body" id="variant-formset">
+                {% for form in formset %}
+                <div class="border p-2 mb-2 variant-form bg-light d-flex align-items-center gap-2 flex-wrap">
+                    {{ form.id }}
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-form').remove()">刪除</button>
+                    {% for field in form.visible_fields %}
+                        {% if field.name != 'DELETE' %}
+                            <div>
+                                <label for="{{ field.id_for_label }}" class="form-label small">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addForm()">新增一筆型號</button>
+        </div>
+
+        <template id="empty-form-template">
+        <div class="border p-2 mb-2 variant-form bg-light d-flex align-items-center gap-2 flex-wrap">
+            {{ formset.empty_form.id }}
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-form').remove()">刪除</button>
+            {% for field in formset.empty_form.visible_fields %}
+                {% if field.name != 'DELETE' %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="form-label small">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        </template>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                售價與進價
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for field in form %}
+                        {% if field.name in "msrp price_a price_b price_c price_d price_e standard_cost cost_rmb cost_usd currency" %}
+                        <div class="col-md-6 mb-3">
+                            <div class="row align-items-center">
+                                <label for="{{ field.id_for_label }}" class="col-sm-4 col-form-label">{{ field.label }}</label>
+                                <div class="col-sm-8">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'product_list' %}" class="btn btn-secondary me-2">取消</a>
+            <button type="submit" class="btn btn-primary">儲存</button>
+        </div>
+    </form>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const unitField = document.getElementById("id_unit");
+    const p1UnitField = document.getElementById("id_package1_unit");
+
+    function updateLabels() {
+        const label1 = document.getElementById("unit_label_1");
+        const label2 = document.getElementById("unit_label_2");
+        if (label1) label1.textContent = unitField?.value || "計量單位";
+        if (label2) label2.textContent = p1UnitField?.value || "包裝1單位";
+    }
+
+    unitField?.addEventListener("input", updateLabels);
+    p1UnitField?.addEventListener("input", updateLabels);
+    updateLabels();
+
+    document.getElementById('id_package1_unit')?.setAttribute('placeholder', '請輸入包裝1單位（如：包）');
+    document.getElementById('id_package2_unit')?.setAttribute('placeholder', '請輸入包裝2單位（如：盒）');
+
+    // 新增品名規格變動自動同步到發票品名（若發票品名為空）
+    const nameField = document.getElementById("id_name");
+    const invoiceNameField = document.getElementById("id_invoice_name");
+
+    nameField?.addEventListener("input", function() {
+        invoiceNameField.value = nameField.value;
+    });
+
+
+    // Inline formset JS
+    window.totalForms = document.getElementById('id_details-TOTAL_FORMS');
+    window.addForm = function() {
+        const container = document.getElementById('variant-formset');
+        const templateNode = document.getElementById('empty-form-template');
+        const formIdx = parseInt(totalForms.value);
+        const templateHtml = templateNode.innerHTML.replace(/__prefix__/g, formIdx);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = templateHtml;
+        const newForm = tempDiv.firstElementChild;
+        container.appendChild(newForm);
+        totalForms.value = formIdx + 1;
+    };
+});
+</script>
+{% endblock %}

@@ -10,10 +10,10 @@
             "request": "launch",
             "args": [
                 "runserver",
-                "0.0.0.0:8000"
+                "0.0.0.0:8000",
             ],
             "django": true,
-            "autoStartBrowser": false,
+            "autoStartBrowser": true,
             "program": "${workspaceFolder}/manage.py"
         }
     ]

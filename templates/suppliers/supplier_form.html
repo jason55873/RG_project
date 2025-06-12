@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">{{ form.instance.pk|yesno:"編輯廠商資料,新增廠商資料" }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" id="supplier-form">
+                {% csrf_token %}
+                <div class="row">
+                    {% for field in form.visible_fields %}
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <hr>
+                <h5>相關地址</h5>
+<div id="addresses-container" style="overflow-x: auto;">
+  {{ formset.management_form }}
+  <table class="table table-bordered table-sm" style="white-space: nowrap;">
+    <thead>
+      <tr>
+        <th>代碼</th>
+        <th>地址</th>
+        <th>郵遞區號</th>
+        <th>聯絡人</th>
+        <th>聯絡人職稱</th>
+        <th>電話</th>
+        <th>傳真</th>
+        <th>備註</th>
+        <th>刪除</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for address_form in formset.forms %}
+      <tr>
+        {{ address_form.id }} <!-- 隱藏欄位，確保 formset 更新 -->
+        <td>{{ address_form.code }}</td>
+        <td>{{ address_form.address }}</td>
+        <td>{{ address_form.postal_code }}</td>
+        <td>{{ address_form.contact_person }}</td>
+        <td>{{ address_form.contact_title }}</td>
+        <td>{{ address_form.phone }}</td>
+        <td>{{ address_form.fax }}</td>
+        <td>
+          {% if address_form.note %}
+            <input type="text" name="{{ address_form.note.name }}" id="{{ address_form.note.id_for_label }}" value="{{ address_form.note.value }}" class="form-control form-control-sm" />
+          {% endif %}
+        </td>
+        <td>
+          {% if formset.can_delete %}
+            {{ address_form.DELETE }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+                <button type="button" class="btn btn-outline-primary mb-3" id="add-address-btn">新增地址</button>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">儲存</button>
+                    <a href="{% url 'supplier_list' %}" class="btn btn-secondary">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addressesContainer = document.querySelector('#addresses-container tbody');
+    const addAddressBtn = document.getElementById('add-address-btn');
+    const totalFormsInput = document.querySelector('input[name$="TOTAL_FORMS"]');
+
+    // Django formset empty_form html（必須先 escapejs）
+    const emptyFormTemplate = `{{ formset.empty_form.as_table|escapejs }}`;
+
+    addAddressBtn.addEventListener('click', () => {
+        const currentFormCount = parseInt(totalFormsInput.value);
+        let newFormHtml = emptyFormTemplate.replace(/__prefix__/g, currentFormCount);
+
+        // 創建一個臨時容器來載入 HTML
+        const tempDiv = document.createElement('tbody');
+        tempDiv.innerHTML = newFormHtml;
+
+        const newRow = tempDiv.querySelector('tr');
+        if (newRow) {
+            addressesContainer.appendChild(newRow);
+            totalFormsInput.value = currentFormCount + 1;
+        }
+    });
+
+    // 監聽刪除checkbox勾選，隱藏該行
+    addressesContainer.addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox' && e.target.name.endsWith('DELETE')) {
+            const row = e.target.closest('tr');
+            if (row) {
+                if (e.target.checked) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

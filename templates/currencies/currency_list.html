@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>幣別清單</h2>
+    <div class="mb-3">
+        <a href="{% url 'currency_create' %}" class="btn btn-success">新增幣別</a>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>幣別編號</th>
+                <th>幣別名稱</th>
+                <th>幣別簡稱</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for currency in currencies %}
+            <tr>
+                <td>{{ currency.code }}</td>
+                <td>{{ currency.name }}</td>
+                <td>{{ currency.short_name }}</td>
+                <td>
+                    <a href="{% url 'currency_update' currency.id %}" class="btn btn-sm btn-primary">編輯</a>
+                    <form method="post" action="{% url 'currency_delete' currency.id %}" style="display:inline;" onsubmit="return confirm('你確定要刪除此幣別嗎？');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">刪除</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">尚無幣別資料</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

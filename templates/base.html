@@ -6,12 +6,13 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>{% block title %}{% trans "我的網站" %}{% endblock %}</title>
+  <title>{% block title %}{% trans "立鉅ERP系統" %}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />
   <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
 </head>
 
 <body>
@@ -35,6 +36,41 @@
                 <li>
                   <a class="dropdown-item" href="{% url 'department_list' %}">
                     <i class="bi bi-diagram-3"></i> {% trans "部門資料" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'currency_list' %}">
+                    <i class="bi bi-currency-exchange"></i> {% trans "幣別資料" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'suppliercategory_list' %}">
+                    <i class="bi bi-collection"></i> {% trans "廠商類別" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'supplier_list' %}">
+                    <i class="bi bi-truck"></i> {% trans "廠商資料" %}
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "產品資料設定" %}</a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{% url 'warehouse_list' %}">
+                    <i class="bi bi-house-gear"></i> {% trans "倉庫資料" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'productcategory_list' %}">
+                    <i class="bi bi-tags"></i> {% trans "產品類別" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'product_list' %}">
+                    <i class="bi bi-box-seam"></i> {% trans "產品資料" %}
                   </a>
                 </li>
               </ul>
@@ -93,6 +129,8 @@
   </footer>
 
 </div>
+
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {

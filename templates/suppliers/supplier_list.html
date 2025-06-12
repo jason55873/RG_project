@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container">
+    <h2>廠商資料列表</h2>
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary mb-3">新增廠商資料</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>廠商編號</th>
+                <th>廠商全稱</th>
+                <th>聯絡人</th>
+                <th>電話</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>{{ supplier.code }}</td>
+                <td>{{ supplier.full_name }}</td>
+                <td>{{ supplier.contact_person }}</td>
+                <td>{{ supplier.phone1 }}</td>
+                <td>
+                    <a href="{% url 'supplier_update' supplier.id %}" class="btn btn-sm btn-secondary">編輯</a>
+                    <form action="{% url 'supplier_delete' supplier.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">刪除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
