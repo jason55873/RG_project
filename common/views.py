@@ -4,7 +4,7 @@ from django.forms import inlineformset_factory, modelformset_factory
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
-from .models import Employee, Department, Warehouse, ProductCategory, Product, Currency, ProductDetail, Supplier, SupplierCategory, Address
+from .models import Employee, Department, Warehouse, ProductCategory, Product, Currency, ProductDetail, Supplier, SupplierCategory, Address, CustomerCategory, Customer
 from django.forms import modelform_factory
 from django.http import JsonResponse
 from django.db.models import Q
@@ -27,7 +27,9 @@ from .forms import (
     CurrencyForm,
     SupplierForm,
     SupplierCategoryForm,
-    AddressForm
+    AddressForm,
+    CustomerCategoryForm,
+    CustomerForm
 )
 
 # 員工 Employee CRUD 視圖
@@ -754,18 +756,172 @@ def supplier_delete(request, pk):
         return redirect('supplier_list')
     return render(request, 'suppliers/supplier_confirm_delete.html', {'supplier': supplier})
 
-class SupplierViewSet(viewsets.ModelViewSet):
-    queryset = Supplier.objects.all()
-    serializer_class = SupplierSerializer
 
-class SupplierCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SupplierCategory.objects.all()
-    serializer_class = SupplierCategorySerializer
+# 客戶類別 CustomerCategory CRUD 視圖
 
-class CurrencyViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Currency.objects.all()
-    serializer_class = CurrencySerializer
+@login_required
+@permission_required('common.view_customercategory', raise_exception=True)
+def customercategory_list(request):
+    categories = CustomerCategory.objects.all()
+    return render(request, 'customers/customercategory_list.html', {'categories': categories})
 
-class AddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
+@login_required
+@permission_required('common.add_customercategory', raise_exception=True)
+def customercategory_create(request):
+    if request.method == 'POST':
+        form = CustomerCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('customercategory_list')
+    else:
+        form = CustomerCategoryForm()
+    return render(request, 'customers/customercategory_form.html', {'form': form})
+
+@login_required
+@permission_required('common.change_customercategory', raise_exception=True)
+def customercategory_update(request, pk):
+    category = get_object_or_404(CustomerCategory, pk=pk)
+    if request.method == 'POST':
+        form = CustomerCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('customercategory_list')
+    else:
+        form = CustomerCategoryForm(instance=category)
+    return render(request, 'customers/customercategory_form.html', {'form': form})
+
+@login_required
+@permission_required('common.delete_customercategory', raise_exception=True)
+def customercategory_delete(request, pk):
+    category = get_object_or_404(CustomerCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('customercategory_list')
+    return render(request, 'customers/customercategory_confirm_delete.html', {'category': category})
+
+# 客戶 Customer CRUD 視圖
+
+# 建議放在檔案前面
+CustomerAddressFormSet = modelformset_factory(
+    Address,
+    form=AddressForm,
+    fields=["code", "address", "postal_code", "contact_person", "contact_title", "phone", "fax", "note"],
+    extra=0,
+    can_delete=True
+)
+
+@login_required
+@permission_required('common.view_customer', raise_exception=True)
+def customer_list(request):
+    customers = Customer.objects.filter(is_deleted=False).order_by('id') if hasattr(Customer, 'is_deleted') else Customer.objects.all().order_by('id')
+    return render(request, 'customers/customer_list.html', {'customers': customers})
+
+@login_required
+@permission_required('common.add_customer', raise_exception=True)
+def customer_create(request):
+    if request.method == 'POST':
+        data = request.POST.copy()
+        delivery_address_key = data.pop('delivery_address', [None])[0]
+        invoice_address_key = data.pop('invoice_address', [None])[0]
+        form = CustomerForm(data)
+        formset = CustomerAddressFormSet(request.POST, queryset=Address.objects.none())
+        if form.is_valid() and formset.is_valid():
+            customer = form.save(commit=False)
+            customer.save()  # 先存，取得 pk
+            content_type = ContentType.objects.get_for_model(Customer)
+
+            temp_key_to_pk = {}
+            for i, f in enumerate(formset):
+                if f.cleaned_data and not f.cleaned_data.get('DELETE', False):
+                    address = f.save(commit=False)
+                    address.content_type = content_type
+                    address.object_id = customer.id
+                    address.save()
+                    temp_key = f"new_{i}"
+                    temp_key_to_pk[temp_key] = address.pk
+
+            # 轉換 key 為 pk
+            delivery_address_id = temp_key_to_pk.get(delivery_address_key) if delivery_address_key and delivery_address_key.startswith('new_') else delivery_address_key
+            invoice_address_id = temp_key_to_pk.get(invoice_address_key) if invoice_address_key and invoice_address_key.startswith('new_') else invoice_address_key
+
+            if delivery_address_id:
+                customer.delivery_address_id = delivery_address_id
+            if invoice_address_id:
+                customer.invoice_address_id = invoice_address_id
+            customer.save()
+
+            return redirect('customer_list')
+    else:
+        form = CustomerForm()
+        form.fields['delivery_address'].queryset = Address.objects.none()
+        form.fields['invoice_address'].queryset = Address.objects.none()
+        formset = CustomerAddressFormSet(queryset=Address.objects.none())
+
+    return render(request, 'customers/customer_form.html', {
+        'form': form,
+        'formset': formset,
+        'is_edit': False
+    })
+
+@login_required
+@permission_required('common.change_customer', raise_exception=True)
+def customer_update(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    content_type = ContentType.objects.get_for_model(Customer)
+    addresses = Address.objects.filter(content_type=content_type, object_id=customer.id)
+    if request.method == 'POST':
+        data = request.POST.copy()
+        delivery_address_key = data.pop('delivery_address', [None])[0]
+        invoice_address_key = data.pop('invoice_address', [None])[0]
+        form = CustomerForm(data, instance=customer)
+        formset = CustomerAddressFormSet(request.POST, queryset=addresses)
+        if form.is_valid() and formset.is_valid():
+            customer = form.save()
+            temp_key_to_pk = {}
+            for i, f in enumerate(formset):
+                if f.cleaned_data:
+                    if f.cleaned_data.get('DELETE', False):
+                        if f.instance.pk:
+                            f.instance.delete()
+                    else:
+                        address = f.save(commit=False)
+                        address.content_type = content_type
+                        address.object_id = customer.id
+                        address.save()
+                        temp_key = f"new_{i}"
+                        temp_key_to_pk[temp_key] = address.pk
+                        temp_key_to_pk[str(address.pk)] = address.pk  # 支援舊資料
+            # 轉換 key 為 pk
+            delivery_address_id = temp_key_to_pk.get(delivery_address_key) if delivery_address_key and delivery_address_key.startswith('new_') else delivery_address_key
+            invoice_address_id = temp_key_to_pk.get(invoice_address_key) if invoice_address_key and invoice_address_key.startswith('new_') else invoice_address_key
+
+            if delivery_address_id:
+                customer.delivery_address_id = delivery_address_id
+            if invoice_address_id:
+                customer.invoice_address_id = invoice_address_id
+            customer.save()
+            return redirect('customer_list')
+    else:
+        form = CustomerForm(instance=customer)
+        form.fields['delivery_address'].queryset = addresses
+        form.fields['invoice_address'].queryset = addresses
+        formset = CustomerAddressFormSet(queryset=addresses)
+
+    return render(request, 'customers/customer_form.html', {
+        'form': form,
+        'formset': formset,
+        'is_edit': True
+    })
+
+@login_required
+@permission_required('common.delete_customer', raise_exception=True)
+def customer_delete(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    if request.method == 'POST':
+        if hasattr(customer, 'is_deleted'):
+            customer.is_deleted = True
+            customer.save()
+        else:
+            customer.delete()
+        return redirect('customer_list')
+    return render(request, 'customers/customer_confirm_delete.html', {'customer': customer})
