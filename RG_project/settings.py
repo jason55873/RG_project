@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-k^7ixq@7d3+)3ocsu1^1rq@e4^8072^bo@@mp5_a_9)7f9d%0$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'common',
+    'django_extensions',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -50,6 +53,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # 你的 React 開發伺服器
+]
+
+# 啟用 cookie 支援
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'RG_project.urls'
 
@@ -72,7 +82,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'RG_project.wsgi.application'
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://192.168.1.115",
+]
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -85,11 +97,22 @@ WSGI_APPLICATION = 'RG_project.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {
-            "service": "RGservice"
-        },
+        "NAME": "RG",
+        "USER": "user1",
+        "PASSWORD": "123",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "OPTIONS": {
+#             "service": "RGservice"
+#         },
+#     }
+# }
 
 
 # Password validation
@@ -148,3 +171,17 @@ LOGOUT_REDIRECT_URL = '/login/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',  # 這裡可以改成 DEBUG、INFO、WARNING、ERROR、CRITICAL
+    },
+}

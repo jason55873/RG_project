@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">{{ form.instance.pk|yesno:"編輯廠商資料,新增廠商資料" }}</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" id="supplier-form">
+        {% csrf_token %}
+        <div class="row">
+          {% for field in form.visible_fields %}
+          <div class="col-md-6 mb-3">
+            <div class="form-group">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr>
+        <h5>相關地址</h5>
+        <div id="addresses-container" style="overflow-x: auto;">
+          {{ formset.management_form }}
+          <table class="table table-bordered table-sm" style="white-space: nowrap;">
+            <thead>
+              <tr>
+                <th>代碼</th>
+                <th>地址</th>
+                <th>郵遞區號</th>
+                <th>聯絡人</th>
+                <th>聯絡人職稱</th>
+                <th>電話</th>
+                <th>傳真</th>
+                <th>備註</th>
+                <th>刪除</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for form in formset.forms %}
+              <tr data-index="{{ forloop.counter0 }}"{% if form.instance.pk %} data-pk="{{ form.instance.pk }}"{% endif %}>
+                {{ form.id }}
+                <td>
+                  {{ form.code }}
+                  {% if form.code.errors %}
+                  <div class="text-danger small">{{ form.code.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.address }}
+                  {% if form.address.errors %}
+                  <div class="text-danger small">{{ form.address.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.postal_code }}
+                  {% if form.postal_code.errors %}
+                  <div class="text-danger small">{{ form.postal_code.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.contact_person }}
+                  {% if form.contact_person.errors %}
+                  <div class="text-danger small">{{ form.contact_person.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.contact_title }}
+                  {% if form.contact_title.errors %}
+                  <div class="text-danger small">{{ form.contact_title.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.phone }}
+                  {% if form.phone.errors %}
+                  <div class="text-danger small">{{ form.phone.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.fax }}
+                  {% if form.fax.errors %}
+                  <div class="text-danger small">{{ form.fax.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ form.note }}
+                  {% if form.note.errors %}
+                  <div class="text-danger small">{{ form.note.errors|striptags }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if formset.can_delete %}
+                  {{ form.DELETE }}
+                  <button type="button" class="btn btn-danger btn-sm delete-row-btn">刪除</button>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              {% with ef=formset.empty_form %}
+              <script>
+                const emptyFormRow = `
+                <tr data-index="__prefix__">
+                  {{ ef.id }}
+                  <td>{{ ef.code }}</td>
+                  <td>{{ ef.address }}</td>
+                  <td>{{ ef.postal_code }}</td>
+                  <td>{{ ef.contact_person }}</td>
+                  <td>{{ ef.contact_title }}</td>
+                  <td>{{ ef.phone }}</td>
+                  <td>{{ ef.fax }}</td>
+                  <td>{{ ef.note }}</td>
+                  <td>
+                    {% if formset.can_delete %}
+                    {{ ef.DELETE }}
+                    <button type="button" class="btn btn-danger btn-sm delete-row-btn">刪除</button>
+                    {% endif %}
+                  </td>
+                </tr>
+                `;
+              </script>
+              {% endwith %}
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn-outline-primary mb-3" id="add-address-btn">新增地址</button>
+
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary">儲存</button>
+          <a href="{% url 'supplier_list' %}" class="btn btn-secondary">取消</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if formset.non_form_errors %}
+<div class="alert alert-danger">
+  {{ formset.non_form_errors }}
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const shippingSelect = document.querySelector('select[name="delivery_address"]');
+  const invoiceSelect = document.querySelector('select[name="invoice_address"]');
+  const addressesContainer = document.querySelector('#addresses-container tbody');
+
+  // 新增地址時，動態加入 option
+  function addAddressOption(formIndex, addressValue) {
+    const value = `new_${formIndex}`; // 用唯一 key 標記新地址
+    const option = new Option(addressValue, value);
+    shippingSelect.add(option.cloneNode(true));
+    invoiceSelect.add(option.cloneNode(true));
+  }
+
+  // 刪除地址時，移除 option
+  function removeAddressOption(formIndex, pk) {
+    let value;
+    if (pk) {
+      value = pk; // 舊資料用 pk
+    } else {
+      value = `new_${formIndex}`; // 新資料用 new_x
+    }
+    [shippingSelect, invoiceSelect].forEach(select => {
+      const opt = select.querySelector(`option[value="${value}"]`);
+      if (opt) select.removeChild(opt);
+    });
+  }
+
+  // 監聽新增 row
+  document.getElementById('add-address-btn').addEventListener('click', function () {
+    // 取得目前 form 數量
+    const totalFormsInput = document.querySelector('input[name$="TOTAL_FORMS"]');
+    const formIndex = totalFormsInput.value;
+    // 產生新 row
+    let newRowHtml = emptyFormRow.replace(/__prefix__/g, formIndex);
+    // 插入到 table
+    const tempDiv = document.createElement('tbody');
+    tempDiv.innerHTML = newRowHtml;
+    const newRow = tempDiv.querySelector('tr');
+    if (newRow) {
+      newRow.setAttribute('data-index', formIndex); // 設定 data-index 屬性
+      addressesContainer.appendChild(newRow);
+      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+    }
+    addAddressOption(formIndex, "{% trans '（請輸入地址）' %}");
+  });
+
+  // 監聽刪除 row，使用事件委派
+  addressesContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('delete-row-btn')) {
+      const row = e.target.closest('tr');
+      if (row) {
+        // 勾選隱藏的 DELETE checkbox
+        const checkbox = row.querySelector('input[type="checkbox"][name$="DELETE"]');
+        if (checkbox) checkbox.checked = true;
+        // 取得 data-index 與 data-pk
+        const formIndex = row.getAttribute('data-index');
+        const pk = row.getAttribute('data-pk');
+        // 移除下拉選單 option
+        removeAddressOption(formIndex, pk);
+        // 隱藏該 row
+        row.style.display = 'none';
+      }
+    }
+  });
+
+  // 監聽地址欄位變動，更新下拉選單顯示
+  addressesContainer.addEventListener('input', function (e) {
+    if (e.target.name && e.target.name.endsWith('-address')) {
+      const row = e.target.closest('tr');
+      const formIndex = row.getAttribute('data-index');
+      const value = `new_${formIndex}`;
+      const text = e.target.value;
+      [shippingSelect, invoiceSelect].forEach(select => {
+        const opt = select.querySelector(`option[value="${value}"]`);
+        if (opt) opt.textContent = text;
+      });
+    }
+  });
+});
+</script>
+{% endblock %}

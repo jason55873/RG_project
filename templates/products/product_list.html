@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<div class="container mt-4">
+    <h2>產品清單</h2>
+    <div class="mb-3">
+        <a href="{% url 'product_create' %}" class="btn btn-success">新增產品</a>
+    </div>
+    <form id="search-form" class="row gy-2 gx-2 align-items-center mb-3">
+        <div class="col-md d-flex align-items-center flex-nowrap w-100">
+            <select name="field" class="form-select me-2" style="width: auto; flex-shrink: 0;">
+                <option value="all">全部欄位</option>
+                <option value="code">產品編號</option>
+                <option value="name">品名規格</option>
+                <option value="customer_barcode">客戶端條碼</option>
+            </select>
+            <div class="input-group me-2" style="max-width: 300px;">
+                <input type="text" name="q" id="search-input" class="form-control" placeholder="請輸入關鍵字">
+                <button type="button" id="camera-scan-btn" class="btn btn-outline-secondary" title="掃描條碼" aria-label="掃描條碼">
+<i class="bi bi-camera"></i>
+                </button>
+            </div>
+            <div class="d-flex flex-nowrap align-items-center gap-2 me-2">
+                <button type="submit" class="btn btn-primary">搜尋</button>
+                <button type="button" id="clear-search" class="btn btn-outline-secondary">清除</button>
+            </div>
+        </div>
+        <div class="col-md-auto ms-auto d-flex align-items-center flex-wrap">
+            <label for="page_size_select" class="me-2 mb-0">每頁</label>
+            <select id="page_size_select" name="page_size" class="form-select me-2" style="width: auto;">
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>筆</span>
+        </div>
+    </form>
+    <div class="table-responsive" style="overflow-x: auto;">
+    <table class="table table-striped w-100" style="min-width: 900px;">
+        <thead>
+            <tr>
+                <th>產品編號</th>
+                <th>客戶端條碼</th>
+                <th>品名規格</th>
+                <th>產品類別</th>
+                <th>售價A</th>
+                <th>售價B</th>
+                <th>標準進價</th>
+                <th>計量單位</th>
+                <th>建議售價</th>
+                <th>使用幣別</th>
+                <th>國際條碼</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="product-table-body">
+            <!-- JavaScript will dynamically insert rows here -->
+        </tbody>
+    </table>
+    </div>
+    <nav aria-label="Page navigation" class="d-flex justify-content-center align-items-center mt-3 gap-2 flex-wrap">
+        <button id="prev-page-btn" class="btn btn-outline-primary me-3">上一頁</button>
+        <span id="pagination-info"></span>
+        <button id="next-page-btn" class="btn btn-outline-primary ms-3">下一頁</button>
+    </nav>
+</div>
+
+
+<div id="scanner-modal" class="modal" tabindex="-1" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1050;">
+    <div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); width: 90%; max-width: 500px;">
+        <div id="scanner-container" style="width:300px; height:200px; border: 2px solid #fff;"></div>
+        <div class="text-center mt-3">
+            <button id="close-scanner-btn" class="btn btn-danger">取消</button>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const tableBody = document.getElementById('product-table-body');
+    const form = document.getElementById('search-form');
+    const paginationInfo = document.getElementById('pagination-info');
+    const prevBtn = document.getElementById('prev-page-btn');
+    const nextBtn = document.getElementById('next-page-btn');
+
+    // Ensure the search input is always blank when the page loads
+    form.elements.q.value = '';
+
+    let currentPage = 1;
+    let currentQuery = '';
+    let currentField = 'all';
+    let pageSize = 10;
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                return cookie.substring(name.length + 1);
+            }
+        }
+        return '';
+    }
+
+    window.fetchProducts = async function fetchProducts() {
+        const url = new URL(window.location.origin + window.location.pathname);
+        url.pathname = url.pathname.replace(/\/products\/?$/, '/api/products/');
+        url.searchParams.set('q', currentQuery);
+        url.searchParams.set('field', currentField);
+        url.searchParams.set('page', currentPage);
+        url.searchParams.set('page_size', pageSize);
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            alert('載入資料失敗');
+            return;
+        }
+        const data = await response.json();
+
+        renderTable(data.results);
+        renderPagination(data.page, data.page_size, data.count);
+    }
+
+    function renderTable(products) {
+        tableBody.innerHTML = '';
+        if (products.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="12" class="text-center">尚無產品資料</td></tr>`;
+            return;
+        }
+
+        const langPrefix = window.location.pathname.split('/')[1];
+
+        for (const p of products) {
+            const editUrl = `/${langPrefix}/common/products/${p.id}/edit/`;
+            const deleteUrl = `/${langPrefix}/common/products/${p.id}/delete/`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${p.code}</td>
+                <td>${p.customer_barcode || ''}</td>
+                <td>${p.name}</td>
+                <td>${p.category || ''}</td>
+                <td>${p.price_a}</td>
+                <td>${p.price_b}</td>
+                <td>${p.standard_cost}</td>
+                <td>${p.unit || ''}</td>
+                <td>${p.msrp}</td>
+                <td>${p.currency || ''}</td>
+                <td>${p.barcode || ''}</td>
+                <td>
+                    <a href="${editUrl}" class="btn btn-sm btn-primary">編輯</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id}, '${deleteUrl}')">刪除</button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        }
+    }
+
+    function renderPagination(page, pageSize, totalCount) {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        paginationInfo.textContent = `第 ${page} 頁 / 共 ${totalPages} 頁`;
+
+        prevBtn.disabled = page <= 1;
+        nextBtn.disabled = page >= totalPages;
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentQuery = form.elements.q.value;
+        currentField = form.elements.field.value;
+        pageSize = parseInt(form.elements.page_size.value);
+        currentPage = 1;
+        fetchProducts();
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchProducts();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentPage++;
+        fetchProducts();
+    });
+
+    window.deleteProduct = async function(id, url) {
+        if (confirm('確定刪除此產品嗎？')) {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                fetchProducts();
+            } else {
+                alert('刪除失敗');
+            }
+        }
+    };
+
+    document.getElementById('clear-search').addEventListener('click', () => {
+        form.elements.q.value = '';
+        form.elements.field.value = 'all';
+        currentQuery = '';
+        currentField = 'all';
+        currentPage = 1;
+        fetchProducts();
+    });
+
+    fetchProducts();
+
+    const scannerModal = document.getElementById('scanner-modal');
+    const scannerContainer = document.getElementById('scanner-container');
+    const closeScannerBtn = document.getElementById('close-scanner-btn');
+
+    function startQuaggaScanner() {
+        scannerModal.style.display = 'block';
+
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: scannerContainer,
+                constraints: {
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                }
+            },
+            decoder: {
+                readers: [
+                    "ean_reader",        // EAN-13 條碼
+                    "code_39_reader",    // Code 39 條碼
+                ]
+            },
+            locate: true
+        }, function(err) {
+            if (err) {
+                alert("啟動掃描器失敗：" + err.message);
+                scannerModal.style.display = 'none';
+                return;
+            }
+            Quagga.start();
+        });
+
+        let scanning = false;
+
+        Quagga.onDetected(function(result) {
+            if (scanning) return; // 已在掃描流程中，忽略後續事件
+            scanning = true;
+
+            const code = result.codeResult.code;
+            document.getElementById('search-input').value = code;
+            currentQuery = code;
+            Quagga.stop();
+            scannerModal.style.display = 'none';
+            fetchProducts().finally(() => {
+                scanning = false; // 可選是否允許重新掃描
+            });
+        });
+    }
+
+    document.getElementById('camera-scan-btn').addEventListener('click', () => {
+        startQuaggaScanner();
+    });
+
+    closeScannerBtn.addEventListener('click', () => {
+        Quagga.stop();
+        scannerModal.style.display = 'none';
+    });
+    });
+</script>
+<script src="{% static 'js/quagga.min.js' %}"></script>
+{% endblock %}
