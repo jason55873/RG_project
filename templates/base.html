@@ -86,6 +86,28 @@
             </li>
           </ul>
         </div>
+        <div class="dropdown">
+          <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="orderManagementDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans '訂單管理' %}">
+            <i class="bi bi-folder2-open"></i> {% trans "訂單管理" %}
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="orderManagementDropdown">
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "採購作業" %}</a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{% url 'employee_list' %}">
+                    <i class="bi bi-person-lines-fill"></i> {% trans "採購憑單" %}
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "訂單作業" %}</a>
+              <ul class="dropdown-menu">
+              </ul>
+            </li>
+          </ul>
+        </div>
         {% endif %}
       </div>
       <div class="ms-auto d-flex align-items-center gap-2">
@@ -136,8 +158,6 @@
   <footer class="text-center mt-4 mb-2">
     <small>&copy; 2025</small>
   </footer>
-
-</div>
 
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
