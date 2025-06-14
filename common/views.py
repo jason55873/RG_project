@@ -628,7 +628,8 @@ AddressFormSet = modelformset_factory(
     Address,
     form=AddressForm,
     fields=["code", "address", "postal_code", "contact_person", "contact_title", "phone", "fax", "note"],
-    extra=0
+    extra=0,
+    can_delete=True
 )
 
 
@@ -669,9 +670,10 @@ def supplier_create(request):
 def supplier_update(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     content_type = ContentType.objects.get_for_model(Supplier)
+    addresses = Address.objects.filter(content_type=content_type, object_id=supplier.id)
     if request.method == 'POST':
         form = SupplierForm(request.POST, instance=supplier)
-        formset = AddressFormSet(request.POST, queryset=supplier.addresses.all())
+        formset = AddressFormSet(request.POST, queryset=addresses)
         if form.is_valid() and formset.is_valid():
             form.save()
             for f in formset:
@@ -687,7 +689,7 @@ def supplier_update(request, pk):
             return redirect('supplier_list')
     else:
         form = SupplierForm(instance=supplier)
-        formset = AddressFormSet(queryset=supplier.addresses.all())
+        formset = AddressFormSet(queryset=addresses)
 
     return render(request, 'suppliers/supplier_form.html', {
         'form': form,

@@ -1,10 +1,10 @@
-{% load i18n %}
-{% load static %}
 
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
-
-<head>
+  
+  <head>
+  {% load i18n %}
+  {% load static %}
   <meta charset="UTF-8" />
   <title>{% block title %}{% trans "立鉅ERP系統" %}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />

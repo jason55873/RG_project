@@ -42,28 +42,48 @@
       </tr>
     </thead>
     <tbody>
-      {% for address_form in formset.forms %}
-      <tr>
-        {{ address_form.id }} <!-- 隱藏欄位，確保 formset 更新 -->
-        <td>{{ address_form.code }}</td>
-        <td>{{ address_form.address }}</td>
-        <td>{{ address_form.postal_code }}</td>
-        <td>{{ address_form.contact_person }}</td>
-        <td>{{ address_form.contact_title }}</td>
-        <td>{{ address_form.phone }}</td>
-        <td>{{ address_form.fax }}</td>
-        <td>
-          {% if address_form.note %}
-            <input type="text" name="{{ address_form.note.name }}" id="{{ address_form.note.id_for_label }}" value="{{ address_form.note.value }}" class="form-control form-control-sm" />
-          {% endif %}
-        </td>
-        <td>
-          {% if formset.can_delete %}
-            {{ address_form.DELETE }}
-          {% endif %}
-        </td>
-      </tr>
+      {% for form in formset.forms %}
+        <tr>
+          {{ form.id }}
+          <td>{{ form.code }}</td>
+          <td>{{ form.address }}</td>
+          <td>{{ form.postal_code }}</td>
+          <td>{{ form.contact_person }}</td>
+          <td>{{ form.contact_title }}</td>
+          <td>{{ form.phone }}</td>
+          <td>{{ form.fax }}</td>
+          <td>{{ form.note }}</td>
+          <td>
+            {% if formset.can_delete %}
+              {{ form.DELETE }}
+              <button type="button" class="btn btn-danger btn-sm delete-row-btn">刪除</button>
+            {% endif %}
+          </td>
+        </tr>
       {% endfor %}
+      {% with ef=formset.empty_form %}
+        <script>
+        const emptyFormRow = `
+        <tr>
+          {{ ef.id }}
+          <td>{{ ef.code }}</td>
+          <td>{{ ef.address }}</td>
+          <td>{{ ef.postal_code }}</td>
+          <td>{{ ef.contact_person }}</td>
+          <td>{{ ef.contact_title }}</td>
+          <td>{{ ef.phone }}</td>
+          <td>{{ ef.fax }}</td>
+          <td>{{ ef.note }}</td>
+          <td>
+            {% if formset.can_delete %}
+              {{ ef.DELETE }}
+              <button type="button" class="btn btn-danger btn-sm delete-row-btn">刪除</button>
+            {% endif %}
+          </td>
+        </tr>
+        `;
+        </script>
+      {% endwith %}
     </tbody>
   </table>
 </div>
@@ -84,6 +104,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const addAddressBtn = document.getElementById('add-address-btn');
     const totalFormsInput = document.querySelector('input[name$="TOTAL_FORMS"]');
 
+    addAddressBtn.addEventListener('click', () => {
+    const currentFormCount = parseInt(totalFormsInput.value);
+    let newFormHtml = emptyFormRow.replace(/__prefix__/g, currentFormCount);
+
+    // 創建一個臨時容器來載入 HTML
+    const tempDiv = document.createElement('tbody');
+    tempDiv.innerHTML = newFormHtml;
+
+    const newRow = tempDiv.querySelector('tr');
+    if (newRow) {
+        addressesContainer.appendChild(newRow);
+        totalFormsInput.value = currentFormCount + 1;
+    }
+});
+/*
     // Django formset empty_form html（必須先 escapejs）
     const emptyFormTemplate = `{{ formset.empty_form.as_table|escapejs }}`;
 
@@ -101,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
             totalFormsInput.value = currentFormCount + 1;
         }
     });
-
+*/
     // 監聽刪除checkbox勾選，隱藏該行
     addressesContainer.addEventListener('change', function(e) {
         if (e.target.type === 'checkbox' && e.target.name.endsWith('DELETE')) {
@@ -112,6 +147,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     row.style.display = '';
                 }
+            }
+        }
+    });
+
+    addressesContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-row-btn')) {
+            const row = e.target.closest('tr');
+            if (row) {
+                const checkbox = row.querySelector('input[type="checkbox"][name$="DELETE"]');
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+                row.style.display = 'none';
             }
         }
     });

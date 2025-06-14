@@ -22,3 +22,8 @@ label.required:before {
   color: red;
   margin-right: 4px;
 }
+
+/* 隱藏 Django formset 刪除用的 checkbox */
+input[type="checkbox"][name$="DELETE"] {
+  display: none;
+}

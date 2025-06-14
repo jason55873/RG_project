@@ -81,4 +81,7 @@ class SupplierCategoryForm(forms.ModelForm):
 class AddressForm(forms.ModelForm):
     class Meta:
         model = Address
-        exclude = ['content_type', 'object_id']
+        fields = ["code", "address", "postal_code", "contact_person", "contact_title", "phone", "fax", "note"]
+        widgets = {
+            'note': forms.TextInput(),  # 不加 class
+        }
