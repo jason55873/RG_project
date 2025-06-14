@@ -25,7 +25,8 @@
                     <a href="{% url 'supplier_update' supplier.id %}" class="btn btn-sm btn-secondary">編輯</a>
                     <form action="{% url 'supplier_delete' supplier.id %}" method="post" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger">刪除</button>
+                        <button type="submit" class="btn btn-sm btn-danger"
+  onclick="return confirm('確定要刪除這個廠商嗎？');">刪除</button>
                     </form>
                 </td>
             </tr>

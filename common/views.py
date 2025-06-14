@@ -636,27 +636,53 @@ AddressFormSet = modelformset_factory(
 @login_required
 @permission_required('common.view_supplier', raise_exception=True)
 def supplier_list(request):
-    suppliers = Supplier.objects.filter(is_deleted=False) if hasattr(Supplier, 'is_deleted') else Supplier.objects.all()
+    suppliers = Supplier.objects.filter(is_deleted=False).order_by('id') if hasattr(Supplier, 'is_deleted') else Supplier.objects.all().order_by('id')
     return render(request, 'suppliers/supplier_list.html', {'suppliers': suppliers})
 
 @login_required
 @permission_required('common.add_supplier', raise_exception=True)
 def supplier_create(request):
     if request.method == 'POST':
-        form = SupplierForm(request.POST)
+        data = request.POST.copy()
+        delivery_address_key = data.pop('delivery_address', [None])[0]
+        invoice_address_key = data.pop('invoice_address', [None])[0]
+        form = SupplierForm(data)
         formset = AddressFormSet(request.POST, queryset=Address.objects.none())
         if form.is_valid() and formset.is_valid():
-            supplier = form.save()
+            supplier = form.save(commit=False)
+            supplier.save()  # 先存，取得 pk
             content_type = ContentType.objects.get_for_model(Supplier)
-            for f in formset:
+
+            # 建立暫時 key 對應表
+            temp_key_to_pk = {}
+
+            for i, f in enumerate(formset):
                 if f.cleaned_data and not f.cleaned_data.get('DELETE', False):
                     address = f.save(commit=False)
                     address.content_type = content_type
                     address.object_id = supplier.id
                     address.save()
+                    temp_key = f"new_{i}"
+                    temp_key_to_pk[temp_key] = address.pk
+
+            # 轉換 key 為 pk
+            delivery_address_id = temp_key_to_pk.get(delivery_address_key) if delivery_address_key and delivery_address_key.startswith('new_') else delivery_address_key
+            invoice_address_id = temp_key_to_pk.get(invoice_address_key) if invoice_address_key and invoice_address_key.startswith('new_') else invoice_address_key
+
+            if delivery_address_id:
+                supplier.delivery_address_id = delivery_address_id
+            if invoice_address_id:
+                supplier.invoice_address_id = invoice_address_id
+            supplier.save()
+
             return redirect('supplier_list')
+        else:
+            # ...驗證失敗處理...
+            pass
     else:
         form = SupplierForm()
+        form.fields['delivery_address'].queryset = Address.objects.none()
+        form.fields['invoice_address'].queryset = Address.objects.none()
         formset = AddressFormSet(queryset=Address.objects.none())
 
     return render(request, 'suppliers/supplier_form.html', {
@@ -672,11 +698,15 @@ def supplier_update(request, pk):
     content_type = ContentType.objects.get_for_model(Supplier)
     addresses = Address.objects.filter(content_type=content_type, object_id=supplier.id)
     if request.method == 'POST':
-        form = SupplierForm(request.POST, instance=supplier)
+        data = request.POST.copy()
+        delivery_address_key = data.pop('delivery_address', [None])[0]
+        invoice_address_key = data.pop('invoice_address', [None])[0]
+        form = SupplierForm(data, instance=supplier)
         formset = AddressFormSet(request.POST, queryset=addresses)
         if form.is_valid() and formset.is_valid():
-            form.save()
-            for f in formset:
+            supplier = form.save()
+            temp_key_to_pk = {}
+            for i, f in enumerate(formset):
                 if f.cleaned_data:
                     if f.cleaned_data.get('DELETE', False):
                         if f.instance.pk:
@@ -686,9 +716,23 @@ def supplier_update(request, pk):
                         address.content_type = content_type
                         address.object_id = supplier.id
                         address.save()
+                        temp_key = f"new_{i}"
+                        temp_key_to_pk[temp_key] = address.pk
+                        temp_key_to_pk[str(address.pk)] = address.pk  # 支援舊資料
+            # 轉換 key 為 pk
+            delivery_address_id = temp_key_to_pk.get(delivery_address_key) if delivery_address_key and delivery_address_key.startswith('new_') else delivery_address_key
+            invoice_address_id = temp_key_to_pk.get(invoice_address_key) if invoice_address_key and invoice_address_key.startswith('new_') else invoice_address_key
+
+            if delivery_address_id:
+                supplier.delivery_address_id = delivery_address_id
+            if invoice_address_id:
+                supplier.invoice_address_id = invoice_address_id
+            supplier.save()
             return redirect('supplier_list')
     else:
         form = SupplierForm(instance=supplier)
+        form.fields['delivery_address'].queryset = addresses
+        form.fields['invoice_address'].queryset = addresses
         formset = AddressFormSet(queryset=addresses)
 
     return render(request, 'suppliers/supplier_form.html', {
