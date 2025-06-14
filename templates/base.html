@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
   
@@ -51,6 +50,16 @@
                 <li>
                   <a class="dropdown-item" href="{% url 'supplier_list' %}">
                     <i class="bi bi-truck"></i> {% trans "廠商資料" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'customercategory_list' %}">
+                    <i class="bi bi-person-badge"></i> {% trans "客戶類別" %}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'customer_list' %}">
+                    <i class="bi bi-person"></i> {% trans "客戶資料" %}
                   </a>
                 </li>
               </ul>

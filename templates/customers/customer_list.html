@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>客戶資料列表</h2>
+    <a href="{% url 'customer_create' %}" class="btn btn-primary mb-3">新增客戶資料</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>編號</th>
+                <th>名稱</th>
+                <th>聯絡人</th>
+                <th>電話</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.code }}</td>
+                <td>{{ customer.full_name }}</td>
+                <td>{{ customer.contact_person }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>
+                    <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-info">編輯</a>
+                    <form action="{% url 'customer_delete' customer.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('確定要刪除這個客戶嗎？');">刪除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

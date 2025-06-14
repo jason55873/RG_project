@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>客戶類別列表</h2>
+    <a href="{% url 'customercategory_create' %}" class="btn btn-primary mb-3">新增客戶類別</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>類別編號</th>
+                <th>類別名稱</th>
+                <th>備註</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.code }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.note }}</td>
+                <td>
+                    <a href="{% url 'customercategory_update' category.pk %}" class="btn btn-sm btn-info">編輯</a>
+                    <form action="{% url 'customercategory_delete' category.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('確定要刪除這個類別嗎？');">刪除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

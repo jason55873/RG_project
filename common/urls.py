@@ -1,13 +1,5 @@
 from django.urls import path, include
 from . import views
-from rest_framework.routers import DefaultRouter
-from .views import SupplierViewSet, SupplierCategoryViewSet, CurrencyViewSet, AddressViewSet
-
-router = DefaultRouter()
-router.register(r'suppliers', SupplierViewSet)
-router.register(r'supplier_categories', SupplierCategoryViewSet)
-router.register(r'currencies', CurrencyViewSet)
-router.register(r'addresses', AddressViewSet)
 
 urlpatterns = [
     # 人員資料
@@ -59,6 +51,15 @@ urlpatterns = [
     path('suppliers/<int:pk>/edit/', views.supplier_update, name='supplier_update'),
     path('suppliers/<int:pk>/delete/', views.supplier_delete, name='supplier_delete'),
 
-    path('api/', include(router.urls)),
+    # 客戶類別資料
+    path('customers/categories/', views.customercategory_list, name='customercategory_list'),
+    path('customers/categories/create/', views.customercategory_create, name='customercategory_create'),
+    path('customers/categories/<int:pk>/edit/', views.customercategory_update, name='customercategory_update'),
+    path('customers/categories/<int:pk>/delete/', views.customercategory_delete, name='customercategory_delete'),
 
+    # 客戶資料
+    path('customers/', views.customer_list, name='customer_list'),
+    path('customers/create/', views.customer_create, name='customer_create'),
+    path('customers/<int:pk>/edit/', views.customer_update, name='customer_update'),
+    path('customers/<int:pk>/delete/', views.customer_delete, name='customer_delete'),
 ]

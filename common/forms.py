@@ -11,7 +11,9 @@ from .models import (
     Currency,
     Supplier,
     SupplierCategory,
-    Address
+    Address,
+    CustomerCategory,
+    Customer
 )
 
 class EmployeeForm(forms.ModelForm):
@@ -85,3 +87,13 @@ class AddressForm(forms.ModelForm):
         widgets = {
             'note': forms.TextInput(),  # 不加 class
         }
+
+class CustomerCategoryForm(forms.ModelForm):
+    class Meta:
+        model = CustomerCategory
+        fields = '__all__'
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = '__all__'
