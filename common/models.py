@@ -120,64 +120,6 @@ class Currency(models.Model):
         return f"{self.code} - {self.name}"
 
 
-# Product model
-class Product(models.Model):
-    code = models.CharField(max_length=30, unique=True, verbose_name=_("產品編號"))
-    category = models.ForeignKey('ProductCategory', on_delete=models.PROTECT, verbose_name=_("產品類別"))
-    barcode = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("國際條碼"))
-    customer_barcode = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("客戶端條碼"))
-    name = models.CharField(max_length=200, verbose_name=_("品名規格"))
-    invoice_name = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("發票品名"))
-    english_name = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("英文品名"))
-    unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("計量單位"))
-    package1_qty = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True, verbose_name=_("包裝1數量"))
-    package1_unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("包裝1單位"))
-    package2_qty = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True, verbose_name=_("包裝2數量"))
-    package2_unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("包裝2單位"))
-    currency = models.ForeignKey('Currency', on_delete=models.PROTECT, verbose_name=_("使用幣別"))
-    msrp = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("建議售價"))
-    price_a = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價A"))
-    price_b = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價B"))
-    price_c = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價C"))
-    price_d = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價D"))
-    price_e = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價E"))
-    standard_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("標準進價"))
-    cost_rmb = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("人民幣進價"))
-    cost_usd = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("美金進價"))
-    is_deleted = models.BooleanField(default=False, verbose_name=_("刪除"))
-
-    def __str__(self):
-        return self.name
-
-
-# ProductStock model
-class ProductStock(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name=_("產品"))
-    warehouse = models.ForeignKey('Warehouse', on_delete=models.CASCADE, verbose_name=_("倉庫編號"))
-    safe_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("安全存量"))
-    opening_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("期初存量"))
-    current_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("現有數量"))
-    real_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("實際在庫量"))
-    note = models.TextField(blank=True, null=True, verbose_name=_("備註"))
-
-    def __str__(self):
-        return f"{self.product.code} - {self.warehouse.code}"
-
-
-# ProductDetail model for product variants
-class ProductDetail(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='details', verbose_name=_("主商品"))
-    code_suffix = models.CharField(max_length=10, verbose_name=_("型號"))  # e.g. A, B, C
-    value = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("型號名稱"))  # e.g. 紅色、藍色、黃色、
-
-    class Meta:
-        unique_together = ('product', 'code_suffix')
-        verbose_name = _("產品變化明細")
-        verbose_name_plural = _("產品變化明細")
-
-    def __str__(self):
-        return f"{self.product.code}-{self.code_suffix} ({self.value})"
-
 class Address(models.Model):
     code = models.CharField(max_length=20, unique=True, verbose_name=_("代碼"))
     address = models.CharField(max_length=255, verbose_name=_("地址"))
@@ -327,3 +269,65 @@ class Supplier(models.Model):
     supplier_type = models.CharField(max_length=50, blank=True, verbose_name=_("廠商類型"))
     addresses = GenericRelation(Address, related_query_name='supplier')
 
+    def __str__(self):
+        return f"{self.code} - {self.full_name}"
+
+
+# Product model
+class Product(models.Model):
+    code = models.CharField(max_length=30, unique=True, verbose_name=_("產品編號"))
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, null=True, blank=True, verbose_name="廠商")
+    category = models.ForeignKey('ProductCategory', on_delete=models.PROTECT, verbose_name=_("產品類別"))
+    barcode = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("國際條碼"))
+    customer_barcode = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("客戶端條碼"))
+    name = models.CharField(max_length=200, verbose_name=_("品名規格"))
+    invoice_name = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("發票品名"))
+    english_name = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("英文品名"))
+    unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("計量單位"))
+    package1_qty = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True, verbose_name=_("包裝1數量"))
+    package1_unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("包裝1單位"))
+    package2_qty = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True, verbose_name=_("包裝2數量"))
+    package2_unit = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("包裝2單位"))
+    currency = models.ForeignKey('Currency', on_delete=models.PROTECT, verbose_name=_("使用幣別"))
+    msrp = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("建議售價"))
+    price_a = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價A"))
+    price_b = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價B"))
+    price_c = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價C"))
+    price_d = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價D"))
+    price_e = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("售價E"))
+    standard_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name=_("標準進價"))
+    cost_rmb = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("人民幣進價"))
+    cost_usd = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("美金進價"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("刪除"))
+
+    def __str__(self):
+        return self.name
+
+
+# ProductStock model
+class ProductStock(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name=_("產品"))
+    warehouse = models.ForeignKey('Warehouse', on_delete=models.CASCADE, verbose_name=_("倉庫編號"))
+    safe_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("安全存量"))
+    opening_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("期初存量"))
+    current_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("現有數量"))
+    real_stock = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, default=0, verbose_name=_("實際在庫量"))
+    note = models.TextField(blank=True, null=True, verbose_name=_("備註"))
+
+    def __str__(self):
+        return f"{self.product.code} - {self.warehouse.code}"
+
+
+# ProductDetail model for product variants
+class ProductDetail(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='details', verbose_name=_("主商品"))
+    code_suffix = models.CharField(max_length=10, verbose_name=_("型號"))  # e.g. A, B, C
+    value = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("型號名稱"))  # e.g. 紅色、藍色、黃色、
+
+    class Meta:
+        unique_together = ('product', 'code_suffix')
+        verbose_name = _("產品變化明細")
+        verbose_name_plural = _("產品變化明細")
+
+    def __str__(self):
+        return f"{self.product.code}-{self.code_suffix} ({self.value})"

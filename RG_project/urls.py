@@ -13,6 +13,7 @@ urlpatterns += i18n_patterns(
     path('', views.home_view, name='home'),
     path("admin/", admin.site.urls),
     path('common/', include('common.urls')),
+    path('orders/', include('orders.urls')),
     path('login/', custom_login, name='login'),
     path('logout/', logout_view, name='logout'),
 )

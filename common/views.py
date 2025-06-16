@@ -392,6 +392,7 @@ def productcategory_delete(request, pk):
 @permission_required('common.view_product', raise_exception=True)
 def product_list(request):
     query = request.GET.get('q', '')
+    field = request.GET.get('field', 'all')
     if 'page_size' in request.GET:
         try:
             request.session['page_size'] = int(request.GET.get('page_size'))
@@ -401,11 +402,21 @@ def product_list(request):
 
     product_qs = Product.objects.filter(is_deleted=False)
     if query:
-        product_qs = product_qs.filter(
-            Q(code__icontains=query) |
-            Q(name__icontains=query) |
-            Q(customer_barcode__icontains=query)
-        )
+        if field == 'code':
+            product_qs = product_qs.filter(code__icontains=query)
+        elif field == 'name':
+            product_qs = product_qs.filter(name__icontains=query)
+        elif field == 'customer_barcode':
+            product_qs = product_qs.filter(customer_barcode__icontains=query)
+        elif field == 'barcode':
+            product_qs = product_qs.filter(barcode__icontains=query)
+        else:
+            product_qs = product_qs.filter(
+                Q(code__icontains=query) |
+                Q(name__icontains=query) |
+                Q(customer_barcode__icontains=query)|
+                Q(barcode__icontains=query)
+            )
 
     paginator = Paginator(product_qs.order_by('code'), page_size)
     page = request.GET.get('page')
@@ -548,11 +559,14 @@ def product_list_api(request):
             products_qs = products_qs.filter(name__icontains=query)
         elif field == 'customer_barcode':
             products_qs = products_qs.filter(customer_barcode__istartswith=query)
+        elif field == 'barcode':
+            products_qs = products_qs.filter(barcode__istartswith=query)
         else:
             products_qs = products_qs.filter(
                 Q(code__icontains=query) |
                 Q(name__icontains=query) |
-                Q(customer_barcode__icontains=query)
+                Q(customer_barcode__icontains=query)|
+                Q(barcode__icontains=query)
             )
 
     paginator = Paginator(products_qs.order_by('code'), page_size)

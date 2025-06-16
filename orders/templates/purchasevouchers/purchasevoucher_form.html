@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "新增採購憑單" %}{% endblock %}
+
+{% block content %}
+<h2>{% trans "新增採購憑單" %}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">{% trans "儲存" %}</button>
+    <a href="{% url 'purchasevoucher_list' %}" class="btn btn-secondary">{% trans "返回" %}</a>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // 當選擇廠商地址時，自動帶出聯絡資訊
+  $('#id_supplier_address').change(function() {
+    var addressId = $(this).val();
+    $.getJSON("{% url 'address_detail' %}", {address_id: addressId}, function(data) {
+      $('#address-info').html(
+        '地址：' + data.address + '<br>' +
+        '聯絡人：' + data.contact_person + '<br>' +
+        '職稱：' + data.title + '<br>' +
+        '電話：' + data.phone + '<br>' +
+        '傳真：' + data.fax
+      );
+    });
+  });
+
+  // 當輸入商品編號時，自動帶出商品資訊
+  $('.product-select').change(function() {
+    var productId = $(this).val();
+    $.getJSON("{% url 'product_detail' %}", {product_id: productId}, function(data) {
+      $('#id_unit_price').val(data.unit_price);
+      $('#id_quantity').val(1);
+      $('#id_unit').val(data.unit);
+      $('#product-name').text(data.name);
+    });
+  });
+</script>
+{% endblock %}
