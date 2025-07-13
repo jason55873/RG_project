@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Supplier, Address, SupplierCategory, Currency
+from .models import Supplier, Address, SupplierCategory, Currency, Employee
 from django.contrib.contenttypes.models import ContentType
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -46,3 +46,10 @@ class SupplierSerializer(serializers.ModelSerializer):
         for addr_data in addresses_data:
             Address.objects.create(content_object=instance, **addr_data)
         return instance
+    
+
+# 員工序列化
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ['id', 'employee_id', 'name_chinese']

@@ -136,21 +136,30 @@ def employee_delete(request, pk):
     return render(request, 'employees/employee_confirm_delete.html', {'employee': employee})
 
 def custom_login(request):
+    next_url = request.POST.get('next') or request.GET.get('next') or 'home'
+    if request.user.is_authenticated:
+        return redirect(next_url)
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("home")  # 登入成功後導向首頁（請依實際頁面修改）
+            return redirect(next_url)
         else:
             messages.error(request, "帳號或密碼錯誤")
-    return render(request, "login.html")
-
+    return render(request, "login.html", {"next": next_url})
 
 def logout_view(request):
     logout(request)
     return redirect('login')  # 登出後導回登入頁
+
+
+def custom_404_view(request, exception):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        return redirect('login')
 
 # 部門 Department CRUD 視圖
 
@@ -499,7 +508,7 @@ def product_delete(request, pk):
 
 
 # 貨幣 Currency CRUD 視圖
-CurrencyForm = modelform_factory(Currency, exclude=[])
+CurrencyForm = modelform_factory(Currency, exclude=['is_deleted'])
 
 @login_required
 @permission_required('common.view_currency', raise_exception=True)

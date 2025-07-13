@@ -1,41 +1,668 @@
 {% extends "base.html" %}
 {% load i18n %}
-
+{% load static %}
 {% block title %}{% trans "新增採購憑單" %}{% endblock %}
-
+{% block extra_head %}
+  <script src="{% static 'js/Sortable.min.js' %}"></script>
+{% endblock %}
 {% block content %}
-<h2>{% trans "新增採購憑單" %}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">{% trans "儲存" %}</button>
-    <a href="{% url 'purchasevoucher_list' %}" class="btn btn-secondary">{% trans "返回" %}</a>
-</form>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="row justify-content-center">
+  <div class="col-md-10 col-lg-8 col-xl-10">
+    <div class="card shadow-sm mt-4">
+      <div class="card-header bg-primary text-white py-2">
+        <h5 class="mb-0">{% trans "新增採購憑單" %}</h5>
+      </div>
+      <div class="card-body py-3">
+        <form id="purchase-form">
+          <!-- 區塊：單據資訊 -->
+          <div class="card mb-3">
+            <div class="card-header py-1">
+              <strong>{% trans "單據資訊" %}</strong>
+            </div>
+            <div class="card-body py-2">
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <label for="purchase_date" class="form-label small">{% trans "採購日期" %}</label>
+                  <input type="date" id="purchase_date" name="purchase_date" class="form-control form-control-sm" required>
+                </div>
+                <div class="col-md-3">
+                  <label for="voucher_number" class="form-label small">{% trans "單據號碼" %}</label>
+                  <input type="text" id="voucher_number" name="voucher_number" class="form-control form-control-sm" readonly required>
+                </div>
+                <div class="col-md-3">
+                  <label for="status" class="form-label small">{% trans "單況" %}</label>
+                  <select id="status" name="status" class="form-select form-select-sm">
+                    <option value="open">{% trans "未結案" %}</option>
+                    <option value="closed">{% trans "已結案" %}</option>
+                    <option value="invalid">{% trans "無效" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3"></div>
+                <div class="col-md-3">
+                  <label for="currency" class="form-label small">{% trans "幣別" %}</label>
+                  <select id="currency" name="currency" class="form-select form-select-sm" required></select>
+                </div>
+                <div class="col-md-3">
+                  <label for="price_mode" class="form-label small">{% trans "價格方式" %}</label>
+                  <select id="price_mode" name="price_mode" class="form-select form-select-sm" required>
+                    <option value="tax_excluded">{% trans "未稅" %}</option>
+                    <option value="tax_included">{% trans "含稅" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="tax_rate" class="form-label small">{% trans "稅率" %}</label>
+                  <input type="number" id="tax_rate" name="tax_rate" class="form-control form-control-sm" min="1" step="0.01" value="1" required>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 區塊：廠商資訊 -->
+          <div class="card mb-3">
+            <div class="card-header py-1">
+              <strong>{% trans "廠商資訊" %}</strong>
+            </div>
+            <div class="card-body py-2">
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <label for="supplier" class="form-label small">{% trans "廠商" %}</label>
+                  <select id="supplier" name="supplier" class="form-select form-select-sm select2" required>
+                    <option value="">{% trans "請選擇" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="supplier_address" class="form-label small">{% trans "廠商地址" %}</label>
+                  <select id="supplier_address" name="supplier_address" class="form-select form-select-sm" required>
+                    <option value="">{% trans "請選擇" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">{% trans "聯絡人員" %}</label>
+                  <input type="text" id="contact_person" class="form-control form-control-sm" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">{% trans "職稱" %}</label>
+                  <input type="text" id="contact_title" class="form-control form-control-sm" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">{% trans "電話" %}</label>
+                  <input type="text" id="contact_phone" class="form-control form-control-sm" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">{% trans "傳真號碼" %}</label>
+                  <input type="text" id="contact_fax" class="form-control form-control-sm" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 區塊：人員資訊 -->
+          <div class="card mb-3">
+            <div class="card-header py-1">
+              <strong>{% trans "人員資訊" %}</strong>
+            </div>
+            <div class="card-body py-2">
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <label for="purchaser" class="form-label small">{% trans "採購人員" %}</label>
+                  <select id="purchaser" name="purchaser" class="form-select form-select-sm select2" required>
+                    <option value="">{% trans "請選擇" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="creator" class="form-label small">{% trans "製單人員" %}</label>
+                  <select id="creator" name="creator" class="form-select form-select-sm select2" required>
+                    <option value="">{% trans "請選擇" %}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="reviewer" class="form-label small">{% trans "覆核人員" %}</label>
+                  <select id="reviewer" name="reviewer" class="form-select form-select-sm select2" required>
+                    <option value="">{% trans "請選擇" %}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr class="my-3">
+          <!-- 動態商品區塊 -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">{% trans "採購商品" %}</h6>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="add-item-btn">{% trans "新增商品" %}</button>
+            </div>
+            <!-- 統計區塊 -->
+            <div class="card mt-2">
+              <div class="card-body py-2">
+                <div class="row g-2 align-items-center">
+                  <div class="col-auto">
+                    <label class="form-label mb-0">{% trans "未稅合計" %}：</label>
+                    <span id="sum-amount" class="fw-bold">0.00</span>
+                  </div>
+                  <div class="col-auto">
+                    <label for="tax_type" class="form-label mb-0">{% trans "課稅類別" %}：</label>
+                    <select id="tax_type" name="tax_type" class="form-select form-select-sm d-inline-block" style="width:auto;">
+                      <option value="taxable">{% trans "應稅" %}</option>
+                      <option value="exempt" selected>{% trans "免稅" %}</option>
+                      <option value="zero">{% trans "零稅" %}</option>
+                      <option value="blank">{% trans "空白" %}</option>
+                      <option value="no_invoice">{% trans "免開" %}</option>
+                    </select>
+                  </div>
+                  <div class="col-auto">
+                    <label class="form-label mb-0">{% trans "稅金" %}：</label>
+                    <span id="sum-tax" class="fw-bold">0.00</span>
+                  </div>
+                  <div class="col-auto">
+                    <label class="form-label mb-0">{% trans "原幣總計" %}：</label>
+                    <span id="sum-total" class="fw-bold">0.00</span>
+                  </div>
+                  <div class="col-auto">
+                    <label class="form-label mb-0">{% trans "數量合計" %}：</label>
+                    <span id="sum-qty" class="fw-bold">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 欄位標頭 -->
+            <div class="row g-1 mb-1 px-2">
+              <div class="col-auto" style="width:32px;"></div>
+              <div class="col-auto" style="width:40px;"><span class="small">{% trans "序號" %}</span></div>
+              <div class="col-auto" style="width:120px;"><span class="small">{% trans "產品編號/條碼" %}</span></div>
+              <div class="col-auto" style="width:180px;"><span class="small">{% trans "品名規格" %}</span></div>
+              <div class="col-auto" style="width:70px;"><span class="small">{% trans "數量" %}</span></div>
+              <div class="col-auto" style="width:60px;"><span class="small">{% trans "單位" %}</span></div>
+              <div class="col-auto" style="width:90px;"><span class="small">{% trans "單價" %}</span></div>
+              <div class="col-auto" style="width:70px;"><span class="small">{% trans "折數%" %}</span></div>
+              <div class="col-auto" style="width:100px;"><span class="small">{% trans "金額" %}</span></div>
+              <div class="col-auto" style="width:110px;"><span class="small">{% trans "含稅金額" %}</span></div>
+              <div class="col-auto" style="width:60px;"><span class="small">{% trans "贈品" %}</span></div>
+              <div class="col-auto" style="width:40px;"></div>
+            </div>
+            <ul class="list-group" id="items-list">
+              <!-- 動態商品項目會插入這裡 -->
+            </ul>
+          </div>
+          <hr class="my-3">
+          <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary btn-sm">{% trans "儲存" %}</button>
+            <a href="{% url 'purchasevoucher_list' %}" class="btn btn-secondary btn-sm">{% trans "返回" %}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
-  // 當選擇廠商地址時，自動帶出聯絡資訊
-  $('#id_supplier_address').change(function() {
-    var addressId = $(this).val();
-    $.getJSON("{% url 'address_detail' %}", {address_id: addressId}, function(data) {
-      $('#address-info').html(
-        '地址：' + data.address + '<br>' +
-        '聯絡人：' + data.contact_person + '<br>' +
-        '職稱：' + data.title + '<br>' +
-        '電話：' + data.phone + '<br>' +
-        '傳真：' + data.fax
-      );
+  var supplierList = [];
+  var currencyList = [];
+  var tax_rate = 1;
+  const langCode = "{{ LANGUAGE_CODE }}";
+
+  $(document).ready(function() {
+    // 清空聯絡資訊欄位
+    $('#contact_person').val('');
+    $('#contact_title').val('');
+    $('#contact_phone').val('');
+    $('#contact_fax').val('');
+    $('.select2').select2();
+
+    // 頁面載入時預設採購日期為今天
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    $('#purchase_date').val(todayStr);
+
+    // 頁面載入時自動產生單據號碼
+    const yyyymmdd = today.getFullYear().toString() +
+    String(today.getMonth() + 1).padStart(2, '0') +
+    String(today.getDate()).padStart(2, '0');
+    // 從後端取得今日最新流水號
+    fetch(`/${langCode}/orders/next_serial/?date=${yyyymmdd}`)
+    .then(res => res.json())
+    .then(data => {
+      const serial = String(data.serial).padStart(4, '0');
+      document.getElementById('voucher_number').value = yyyymmdd + serial;
+    });
+    // 撈取所有幣別，包含 tax_rate，並直接帶入 tax_rate 欄位（不受價格方式影響）
+    fetch(`/${langCode}/orders/currencies/`)
+    .then(res => res.json())
+    .then(data => {
+      currencyList = data;
+      const select = document.getElementById('currency');
+      data.forEach(currency => {
+        const opt = document.createElement('option');
+        opt.value = currency.id;
+        opt.textContent = currency.code + " - " + currency.name;
+        opt.setAttribute('data-tax-rate', currency.tax_rate || 1);
+        select.appendChild(opt);
+      });
+      // 若有預設選擇第一個幣別，則帶入 tax_rate
+      if (data.length > 0) {
+        $('#tax_rate').val(data[0].tax_rate || 1);
+        tax_rate = data[0].tax_rate || 1;
+      }
+    });
+    // 頁面載入時取得所有廠商
+    fetch(`/${langCode}/orders/suppliers/`)
+    .then(res => res.json())
+    .then(data => {
+      supplierList = data;
+      const select = document.getElementById('supplier');
+      data.forEach(supplier => {
+        const opt = document.createElement('option');
+        opt.value = supplier.id;
+        opt.textContent = supplier.code + " - " + supplier.full_name;
+        select.appendChild(opt);
+      });
+    });
+    // 取得所有員工
+    fetch(`/${langCode}/orders/employees/`)
+      .then(res => res.json())
+      .then(data => {
+        ['purchaser', 'creator', 'reviewer'].forEach(function(field) {
+          const select = document.getElementById(field);
+          data.forEach(emp => {
+            const opt = document.createElement('option');
+            opt.value = emp.id;
+            opt.textContent = emp.employee_id + " - " + emp.name_chinese;
+            select.appendChild(opt);
+          });
+        });
+      });
+
+    // 頁面載入時 tax_type 預設為免稅
+    $('#tax_type').val('exempt');
+
+    // 當廠商地址選擇變動時，帶出聯絡資訊
+    $('#supplier_address').on('change', function() {
+      const supplierId = $('#supplier').val();
+      const addressId = $(this).val();
+      const supplier = supplierList.find(s => s.id == supplierId);
+      if (supplier && supplier.addresses) {
+        const address = supplier.addresses.find(a => a.id == addressId);
+        if (address) {
+          $('#contact_person').val(address.contact_person || '');
+          $('#contact_title').val(address.contact_title || '');
+          $('#contact_phone').val(address.phone || '');
+          $('#contact_fax').val(address.fax || '');
+        } else {
+          $('#contact_person').val('');
+          $('#contact_title').val('');
+          $('#contact_phone').val('');
+          $('#contact_fax').val('');
+        }
+      }
+    });
+
+    // 當廠商選擇變動時，載入該廠商的地址
+    $('#supplier').on('change', function() {
+      // 清空聯絡資訊欄位
+      $('#contact_person').val('');
+      $('#contact_title').val('');
+      $('#contact_phone').val('');
+      $('#contact_fax').val('');
+      const supplierId = $(this).val();
+      const $addressSelect = $('#supplier_address');
+      $addressSelect.empty().append('<option value="">請選擇</option>');
+      // 只顯示該廠商的地址
+      const supplier = supplierList.find(s => s.id == supplierId);
+      if (supplier && supplier.addresses && supplier.addresses.length > 0) {
+        supplier.addresses.forEach(address => {
+          $addressSelect.append(
+            $('<option>', { value: address.id, text: address.address })
+          );
+        });
+        // 預設選第一筆
+        $addressSelect.val(supplier.addresses[0].id).trigger('change');
+      }
+      // 載入該廠商的 tax_type
+      if (supplier && supplier.tax_type) {
+        $('#tax_type').val(supplier.tax_type);
+      } else {
+        $('#tax_type').val('exempt');
+      }
+      refreshAllTaxAmount();
+    });
+
+    // 價格方式切換時
+    $('#price_mode').on('change', function() {
+      refreshAllTaxAmount();
+    });
+
+    // 幣別切換時，直接帶入 tax_rate（不受價格方式影響）
+    $('#currency').on('change', function() {
+      const currencyId = $(this).val();
+      const currency = currencyList.find(c => c.id == currencyId);
+      $('#tax_rate').val(currency && currency.tax_rate ? currency.tax_rate : 1);
+      tax_rate = currency && currency.tax_rate ? currency.tax_rate : 1;
+      refreshAllTaxAmount();
+    });
+
+    // 稅率欄位改變時
+    $('#tax_rate').on('input', function() {
+      tax_rate = parseFloat($(this).val()) || 1;
+      refreshAllTaxAmount();
+    });
+
+    // 價格方式或課稅類別變動時都要刷新含稅金額
+    $('#price_mode, #tax_type').on('change', function() {
+      refreshAllTaxAmount();
     });
   });
 
-  // 當輸入商品編號時，自動帶出商品資訊
-  $('.product-select').change(function() {
-    var productId = $(this).val();
-    $.getJSON("{% url 'product_detail' %}", {product_id: productId}, function(data) {
-      $('#id_unit_price').val(data.unit_price);
-      $('#id_quantity').val(1);
-      $('#id_unit').val(data.unit);
-      $('#product-name').text(data.name);
+  // 統計區塊與商品含稅金額計算
+  function calcAmount(idx) {
+    const qty = parseFloat(document.querySelector(`input[name="item_qty_${idx}"]`).value) || 0;
+    const price = parseFloat(document.querySelector(`input[name="item_price_${idx}"]`).value) || 0;
+    const discount = parseFloat(document.querySelector(`input[name="item_discount_${idx}"]`).value) || 0;
+    const amount = Math.round(qty * price * discount) / 100;
+    document.querySelector(`input[name="item_amount_${idx}"]`).value = amount.toFixed(2);
+
+    const priceMode = $('#price_mode').val();
+    const taxType = $('#tax_type').val();
+    let taxAmount = amount;
+    let itemTax = 0;
+
+    if (priceMode === 'tax_excluded' && taxType === 'taxable') {
+      // 未稅且應稅，稅金 = 未稅金額 * (tax_rate - 1)
+      itemTax = Math.round(amount * (tax_rate - 1) * 100) / 100;
+      taxAmount = amount + itemTax;
+    } else if (priceMode === 'tax_included' && taxType === 'taxable') {
+      // 含稅且應稅，稅金 = 含稅金額 - (含稅金額 / tax_rate)
+      taxAmount = amount; // amount 為含稅金額
+      itemTax = Math.round((taxAmount - (taxAmount / tax_rate)) * 100) / 100;
+    } else {
+      // 其他課稅類別皆視為免稅，含稅金額=未稅金額，稅金=0
+      itemTax = 0;
+      taxAmount = amount;
+    }
+    document.querySelector(`input[name="item_tax_amount_${idx}"]`).value = taxAmount.toFixed(2);
+    document.querySelector(`input[name="item_amount_${idx}"]`).setAttribute('data-tax', itemTax.toFixed(2));
+    updateSummary();
+  }
+
+  function updateSummary() {
+    let sumAmount = 0;
+    let sumTax = 0;
+    let sumTotal = 0;
+    let sumQty = 0;
+    const priceMode = $('#price_mode').val();
+    const taxType = $('#tax_type').val();
+
+    document.querySelectorAll('#items-list li').forEach(li => {
+      const idx = li.getAttribute('data-idx');
+      const qty = parseFloat(li.querySelector(`input[name="item_qty_${idx}"]`).value) || 0;
+      const amount = parseFloat(li.querySelector(`input[name="item_amount_${idx}"]`).value) || 0;
+      let taxAmount = parseFloat(li.querySelector(`input[name="item_tax_amount_${idx}"]`).value) || 0;
+      let itemTax = 0;
+
+      if (priceMode === 'tax_excluded' && taxType === 'taxable') {
+        itemTax = Math.round(amount * (tax_rate - 1) * 100) / 100;
+        taxAmount = amount + itemTax;
+      } else if (priceMode === 'tax_included' && taxType === 'taxable') {
+        taxAmount = amount;
+        itemTax = Math.round((taxAmount - (taxAmount / tax_rate)) * 100) / 100;
+      } else {
+        itemTax = 0;
+        taxAmount = amount;
+      }
+
+      sumAmount += amount;
+      sumTotal += taxAmount;
+      sumTax += itemTax;
+      sumQty += qty;
+    });
+    $('#sum-amount').text(sumAmount.toFixed(2));
+    $('#sum-tax').text(sumTax.toFixed(2));
+    $('#sum-total').text(sumTotal.toFixed(2));
+    $('#sum-qty').text(sumQty);
+  }
+
+  // 在商品資料異動時呼叫 updateSummary
+  function refreshAllTaxAmount() {
+    document.querySelectorAll('#items-list li').forEach(li => {
+      const idx = li.getAttribute('data-idx');
+      calcAmount(idx);
+    });
+    updateSummary();
+  }
+
+  // 更新所有商品的序號顯示，並更新統計
+  function updateItemOrder() {
+    document.querySelectorAll('#items-list .item-order').forEach((el, i) => {
+      el.textContent = i + 1;
+    });
+    updateSummary();
+  }
+
+  // 在商品異動時也呼叫 updateSummary
+  function bindAmountEvents(idx) {
+    ['item_qty_', 'item_price_', 'item_discount_'].forEach(field => {
+      document.querySelector(`input[name="${field}${idx}"]`).addEventListener('input', function() {
+        if (document.querySelector(`input[name="item_gift_${idx}"]`).checked) {
+          document.querySelector(`input[name="item_amount_${idx}"]`).value = "0.00";
+          document.querySelector(`input[name="item_tax_amount_${idx}"]`).value = "0.00";
+          document.querySelector(`input[name="item_price_${idx}"]`).value = "0";
+        } else {
+          calcAmount(idx);
+        }
+        updateSummary();
+      });
+    });
+  }
+
+  let itemIdx = 0;
+  function createItemRow(idx) {
+    return `
+      <li class="list-group-item py-2 px-1 d-flex align-items-center gap-1 flex-wrap" data-idx="${idx}">
+        <span class="handle bi bi-list" style="cursor:grab;"></span>
+        <span class="item-order badge bg-secondary me-1" style="width:2em;">${idx + 1}</span>
+        <input type="text" class="form-control form-control-sm" style="width:120px;" name="item_code_${idx}" placeholder="{% trans '產品編號/條碼' %}" required autocomplete="off">
+        <input type="text" class="form-control form-control-sm" style="width:180px;" name="item_name_${idx}" placeholder="{% trans '品名規格' %}" readonly>
+        <input type="number" class="form-control form-control-sm" style="width:70px;" name="item_qty_${idx}" placeholder="{% trans '數量' %}" min="0" value="0" step="1" required>
+        <input type="text" class="form-control form-control-sm" style="width:60px;" name="item_unit_${idx}" placeholder="{% trans '單位' %}" readonly>
+        <input type="number" class="form-control form-control-sm" style="width:90px;" name="item_price_${idx}" placeholder="{% trans '單價' %}" min="0" step="1" required>
+        <input type="number" class="form-control form-control-sm" style="width:70px;" name="item_discount_${idx}" placeholder="{% trans '折數%' %}" min="0" max="100" value="100" step="1" required>
+        <input type="number" class="form-control form-control-sm" style="width:100px;" name="item_amount_${idx}" placeholder="{% trans '金額' %}" readonly>
+        <input type="number" class="form-control form-control-sm" style="width:110px;" name="item_tax_amount_${idx}" placeholder="{% trans '含稅金額' %}" readonly>
+        <div class="form-check ms-2">
+          <input class="form-check-input item-gift-checkbox" type="checkbox" name="item_gift_${idx}" id="item_gift_${idx}">
+          <label class="form-check-label small" for="item_gift_${idx}">{% trans "贈品" %}</label>
+        </div>
+        <input type="hidden" name="item_product_id_${idx}" value="">
+        <button type="button" class="btn btn-sm btn-danger remove-item-btn ms-1">&times;</button>
+      </li>
+    `;
+  }
+
+  // 新增商品時
+  document.getElementById('add-item-btn').addEventListener('click', function() {
+    const list = document.getElementById('items-list');
+    list.insertAdjacentHTML('beforeend', createItemRow(itemIdx));
+    bindProductCodeEvent(itemIdx);
+    bindAmountEvents(itemIdx);
+    bindGiftEvent(itemIdx);
+    updateItemOrder();
+    itemIdx++;
+  });
+
+  // 刪除商品時
+  document.getElementById('items-list').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-item-btn')) {
+      e.target.closest('li').remove();
+      updateItemOrder();
+    }
+  });
+
+  // 拖拉排序時
+  new Sortable(document.getElementById('items-list'), {
+    handle: '.handle',
+    animation: 150,
+    onEnd: function() {
+      updateItemOrder();
+    }
+  });
+
+  // 贈品勾選時金額設為0
+  function bindGiftEvent(idx) {
+    const giftCheckbox = document.querySelector(`input[name="item_gift_${idx}"]`);
+    const priceInput = document.querySelector(`input[name="item_price_${idx}"]`);
+    giftCheckbox.addEventListener('change', function() {
+      if (giftCheckbox.checked) {
+        // 勾選時單價歸0
+        priceInput.setAttribute('data-original-price', priceInput.value);
+        priceInput.value = 0;
+        document.querySelector(`input[name="item_amount_${idx}"]`).value = "0.00";
+        document.querySelector(`input[name="item_tax_amount_${idx}"]`).value = "0.00";
+      } else {
+        // 取消勾選時恢復原單價
+        const original = priceInput.getAttribute('data-original-price');
+        if (original !== null) {
+          priceInput.value = original;
+        }
+        calcAmount(idx);
+      }
+      updateSummary();
+    });
+  }
+
+  // 綁定金額自動計算事件
+  function bindAmountEvents(idx) {
+    ['item_qty_', 'item_price_', 'item_discount_'].forEach(field => {
+      document.querySelector(`input[name="${field}${idx}"]`).addEventListener('input', function() {
+        // 若為贈品則金額固定為0
+        if (document.querySelector(`input[name="item_gift_${idx}"]`).checked) {
+          document.querySelector(`input[name="item_amount_${idx}"]`).value = "0.00";
+          document.querySelector(`input[name="item_tax_amount_${idx}"]`).value = "0.00";
+          document.querySelector(`input[name="item_price_${idx}"]`).value = "0";
+        } else {
+          calcAmount(idx);
+        }
+      });
+    });
+  }
+
+  // 表單送出時收集商品資料
+  document.getElementById('purchase-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    const data = {
+      purchase_date: document.getElementById('purchase_date').value,
+      voucher_number: document.getElementById('voucher_number').value,
+      status: document.getElementById('status').value,
+      currency: document.getElementById('currency').value,
+      price_mode: document.getElementById('price_mode').value,
+      supplier: document.getElementById('supplier').value,
+      supplier_address: document.getElementById('supplier_address').value,
+      purchaser: document.getElementById('purchaser').value,
+      creator: document.getElementById('creator').value,
+      reviewer: document.getElementById('reviewer').value,
+      items: []
+    };
+    document.querySelectorAll('#items-list li').forEach(li => {
+      const idx = li.getAttribute('data-idx');
+      data.items.push({
+        code: li.querySelector(`input[name="item_code_${idx}"]`).value,
+        name: li.querySelector(`input[name="item_name_${idx}"]`).value,
+        qty: li.querySelector(`input[name="item_qty_${idx}"]`).value,
+        unit: li.querySelector(`input[name="item_unit_${idx}"]`).value,
+        price: li.querySelector(`input[name="item_price_${idx}"]`).value,
+        discount: li.querySelector(`input[name="item_discount_${idx}"]`).value,
+        amount: li.querySelector(`input[name="item_amount_${idx}"]`).value,
+        tax_amount: li.querySelector(`input[name="item_tax_amount_${idx}"]`).value,
+        gift: li.querySelector(`input[name="item_gift_${idx}"]`).checked,
+        product_id: li.querySelector(`input[name="item_product_id_${idx}"]`).value,
+      });
+    });
+    fetch(`/${langCode}/orders/purchasevouchers/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(csrftoken ? {'X-CSRFToken': csrftoken} : {})
+      },
+      body: JSON.stringify(data),
+      credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log(result);
+      if(result.id){
+        alert('新增成功！');
+        //window.location.href = "{% url 'purchasevoucher_list' %}";
+      }else{
+        alert('新增失敗：' + JSON.stringify(result));
+      }
     });
   });
+
+  // 預設新增一筆商品
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('add-item-btn').click();
+    updateSummary();
+  });
+
+  // 綁定產品編號查詢事件
+  function bindProductCodeEvent(idx) {
+    const codeInput = document.querySelector(`input[name="item_code_${idx}"]`);
+    codeInput.addEventListener('blur', function(e) {
+      const code = codeInput.value.trim();
+      if (!code) return;
+      const nameInput = document.querySelector(`input[name="item_name_${idx}"]`);
+      const unitInput = document.querySelector(`input[name="item_unit_${idx}"]`);
+      const priceInput = document.querySelector(`input[name="item_price_${idx}"]`);
+      const qtyInput = document.querySelector(`input[name="item_qty_${idx}"]`);
+      const discountInput = document.querySelector(`input[name="item_discount_${idx}"]`);
+      const giftCheckbox = document.querySelector(`input[name="item_gift_${idx}"]`);
+      const oldCode = codeInput.getAttribute('data-last-code') || '';
+      fetch(`/${langCode}/orders/product_lookup/?q=${encodeURIComponent(code)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.id) {
+            // 如果贈品勾選且商品編號相同，不異動
+            if (giftCheckbox.checked && oldCode === data.code) {
+              codeInput.value = data.code || code;
+              return;
+            }
+            // 如果贈品勾選且商品編號不同，清空欄位再填入新資料
+            if (giftCheckbox.checked && oldCode !== data.code) {
+              nameInput.value = '';
+              unitInput.value = '';
+              priceInput.value = '';
+              qtyInput.value = 0;
+              discountInput.value = 100;
+            }
+            // 填入新資料
+            codeInput.value = data.code || code;
+            nameInput.value = data.name_spec || '';
+            unitInput.value = data.unit || '';
+            // 儲存原始單價到 data-original-price
+            priceInput.setAttribute('data-original-price', data.price || '');
+            if (giftCheckbox.checked) {
+              priceInput.value = 0;
+            } else {
+              priceInput.value = data.price || '';
+            }
+            qtyInput.value = 1;
+            discountInput.value = 100;
+            document.querySelector(`input[name="item_product_id_${idx}"]`).value = data.id || '';
+            codeInput.setAttribute('data-last-code', data.code || code);
+            calcAmount(idx);
+          } else {
+            codeInput.value = '';
+            nameInput.value = '';
+            unitInput.value = '';
+            priceInput.value = '';
+            priceInput.removeAttribute('data-original-price');
+            qtyInput.value = 0;
+            discountInput.value = 100;
+            calcAmount(idx);
+            alert('查無產品資料');
+          }
+        });
+    });
+  }
 </script>
 {% endblock %}

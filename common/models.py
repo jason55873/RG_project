@@ -114,6 +114,7 @@ class Currency(models.Model):
     code = models.CharField(max_length=10, unique=True, verbose_name=_("幣別編號"))
     name = models.CharField(max_length=50, verbose_name=_("幣別名稱"))
     short_name = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("幣別簡稱"))
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0, verbose_name=_("稅率"))
     is_deleted = models.BooleanField(default=False, verbose_name=_("刪除"))
 
     def __str__(self):

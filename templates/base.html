@@ -12,6 +12,12 @@
   <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'select2/js/select2.min.js' %}"></script>
+  <link href="{% static 'select2/css/select2.min.css' %}" rel="stylesheet" />
+  {% block extra_head %}{% endblock %}
 </head>
 
 <body>
@@ -159,8 +165,6 @@
     <small>&copy; 2025</small>
   </footer>
 
-  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
-  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const dropdownToggles = document.querySelectorAll('.dropdown-submenu .dropdown-toggle');
@@ -181,5 +185,4 @@
     });
   </script>
 </body>
-
 </html>

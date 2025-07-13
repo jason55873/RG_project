@@ -11,6 +11,7 @@
                 <th>幣別編號</th>
                 <th>幣別名稱</th>
                 <th>幣別簡稱</th>
+                <th>稅率</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -20,6 +21,7 @@
                 <td>{{ currency.code }}</td>
                 <td>{{ currency.name }}</td>
                 <td>{{ currency.short_name }}</td>
+                <td>{{ currency.tax_rate }}</td>
                 <td>
                     <a href="{% url 'currency_update' currency.id %}" class="btn btn-sm btn-primary">編輯</a>
                     <form method="post" action="{% url 'currency_delete' currency.id %}" style="display:inline;" onsubmit="return confirm('你確定要刪除此幣別嗎？');">
