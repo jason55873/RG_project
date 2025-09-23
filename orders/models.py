@@ -13,6 +13,18 @@ class PurchaseVoucher(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open', verbose_name="單況")
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name="幣別")
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, verbose_name="廠商")
+    tax_type = models.CharField(
+        max_length=10,
+        choices=[
+            ('taxable', _('應稅')),
+            ('exempt', _('免稅')),
+            ('zero', _('零稅')),
+            ('blank', _('空白')),
+            ('no_invoice', _('免開'))
+        ],
+        blank=True,
+        verbose_name=_("課稅類別")
+    )
     supplier_address = models.ForeignKey(
         Address,
         on_delete=models.PROTECT,

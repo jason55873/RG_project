@@ -15,6 +15,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
+from django.http import JsonResponse, Http404
 
 
 
@@ -68,7 +69,6 @@ def product_lookup(request):
     })
 
 class PurchaseVoucherCreateAPIView(APIView):
-    print("PurchaseVoucherCreateAPIView called")
     def post(self, request):
         data = request.data
         try:
@@ -106,5 +106,41 @@ class PurchaseVoucherCreateAPIView(APIView):
                 return Response({'id': voucher.id, 'voucher_number': voucher.voucher_number}, status=201)
         except Exception as e:
             return Response({'error': str(e)}, status=400)
+
+def purchasevoucher_detail(request, pk):
+    try:
+        voucher = PurchaseVoucher.objects.get(pk=pk)
+    except PurchaseVoucher.DoesNotExist:
+        raise Http404
+    items = PurchaseVoucherItem.objects.filter(purchase_voucher=voucher)
+    data = {
+        "id": voucher.id,
+        "purchase_date": voucher.purchase_date.strftime("%Y-%m-%d"),
+        "voucher_number": voucher.voucher_number,
+        "status": voucher.status,
+        "currency": voucher.currency_id,
+        "price_mode": voucher.price_mode,
+        "tax_rate": float(voucher.currency.tax_rate),
+        "supplier": voucher.supplier_id,
+        "supplier_address": voucher.supplier_address_id,
+        "purchaser": voucher.purchaser_id,
+        "creator": voucher.creator_id,
+        "reviewer": voucher.reviewer_id,
+        "tax_type": voucher.tax_type,
+        "items": [
+            {
+                "code": item.product.code,
+                "name": item.product.name,
+                "qty": item.quantity,
+                "unit": item.product.unit,
+                "price": float(item.unit_price),
+                "discount": float(item.discount)*100,
+                "gift": item.is_gift,
+                "product_id": item.product_id,
+            }
+            for item in items
+        ]
+    }
+    return JsonResponse(data)
 
 

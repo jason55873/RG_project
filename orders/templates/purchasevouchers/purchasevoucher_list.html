@@ -33,7 +33,7 @@
             <td>{{ voucher.currency }}</td>
             <td>{{ voucher.purchaser }}</td>
             <td>
-                <a href="{% url 'purchasevoucher_edit' voucher.pk %}" class="btn btn-sm btn-outline-secondary">{% trans "編輯" %}</a>
+                <a href="{% url 'PurchaseVoucherEditPage' voucher.pk %}" class="btn btn-sm btn-outline-secondary">{% trans "編輯" %}</a>
                 <a href="{% url 'purchasevoucher_delete' voucher.pk %}" class="btn btn-sm btn-outline-danger">{% trans "刪除" %}</a>
             </td>
         </tr>

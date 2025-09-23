@@ -12,10 +12,6 @@ from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import viewsets
 from .serializers import SupplierSerializer, SupplierCategorySerializer, CurrencySerializer, AddressSerializer
-
-
-
-
 from .forms import (
     EmployeeForm,
     EmployeeProfileForm,
@@ -29,7 +25,9 @@ from .forms import (
     SupplierCategoryForm,
     AddressForm,
     CustomerCategoryForm,
-    CustomerForm
+    CustomerForm,
+    RequiredDetailFormSet,
+    ProductDetailForm
 )
 
 # 員工 Employee CRUD 視圖
@@ -441,8 +439,11 @@ def product_list(request):
 # Inline formset for ProductDetail
 ProductDetailFormSet = inlineformset_factory(
     Product, ProductDetail,
-    fields=["id","code_suffix", "value"],
-    extra=0
+    form=ProductDetailForm,
+    fields=["id","barcode","code_suffix", "value"],
+    formset=RequiredDetailFormSet,
+    extra=0,
+    min_num=1,
 )
 
 @login_required
@@ -455,6 +456,11 @@ def product_create(request):
         form.fields['currency'].queryset = Currency.objects.filter(is_deleted=False)
         formset = ProductDetailFormSet(request.POST, instance=product)
         if form.is_valid() and formset.is_valid():
+            # 檢查未被刪除的表單數量
+            not_deleted = [f for f in formset.forms if not f.cleaned_data.get('DELETE', False)]
+            valid_count = sum(1 for f in not_deleted if f.cleaned_data.get('barcode'))
+            if valid_count == 0:
+                formset.non_form_errors = lambda: ["至少要有一筆商品型號且條碼必填"]
             product = form.save()
             formset.instance = product
             formset.save()
@@ -481,6 +487,11 @@ def product_update(request, pk):
         form.fields['currency'].queryset = Currency.objects.filter(is_deleted=False)
         formset = ProductDetailFormSet(request.POST, instance=product)
         if form.is_valid() and formset.is_valid():
+            # 檢查未被刪除的表單數量
+            not_deleted = [f for f in formset.forms if not f.cleaned_data.get('DELETE', False)]
+            valid_count = sum(1 for f in not_deleted if f.cleaned_data.get('barcode'))
+            if valid_count == 0:
+                formset.non_form_errors = lambda: ["至少要有一筆商品型號且條碼必填"]
             product = form.save()
             formset.save()
             return redirect('product_list')
@@ -569,13 +580,13 @@ def product_list_api(request):
         elif field == 'customer_barcode':
             products_qs = products_qs.filter(customer_barcode__istartswith=query)
         elif field == 'barcode':
-            products_qs = products_qs.filter(barcode__istartswith=query)
+            products_qs = products_qs.filter(details__barcode=query)
         else:
             products_qs = products_qs.filter(
                 Q(code__icontains=query) |
                 Q(name__icontains=query) |
                 Q(customer_barcode__icontains=query)|
-                Q(barcode__icontains=query)
+                Q(details__barcode__icontains=query)
             )
 
     paginator = Paginator(products_qs.order_by('code'), page_size)
@@ -595,7 +606,7 @@ def product_list_api(request):
             'unit': p.unit,
             'msrp': str(p.msrp),
             'currency': p.currency.short_name if p.currency else '',
-            'barcode': p.barcode,
+            'barcode': "\n".join(filter(None, p.details.all().values_list('barcode', flat=True)))
         })
 
     return JsonResponse({

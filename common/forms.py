@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django import forms
+from django.forms import BaseInlineFormSet
 from .models import (
     Employee,
     EmployeeProfile,
@@ -13,7 +14,8 @@ from .models import (
     SupplierCategory,
     Address,
     CustomerCategory,
-    Customer
+    Customer,
+    ProductDetail
 )
 
 class EmployeeForm(forms.ModelForm):
@@ -97,3 +99,23 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = '__all__'
+
+class RequiredDetailFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        valid_count = 0
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            if form.cleaned_data.get('barcode'):
+                valid_count += 1
+        if valid_count == 0:
+            raise forms.ValidationError("至少要有一筆商品型號且條碼必填")
+        
+class ProductDetailForm(forms.ModelForm):
+    class Meta:
+        model = ProductDetail
+        fields = ["id", "barcode", "code_suffix", "value"]
+        widgets = {
+            "barcode": forms.TextInput(attrs={"required": "required"}),
+        }

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load static %}
+<link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.css' %}">
 <div class="container mt-4">
     <h2>產品清單</h2>
     <div class="mb-3">
@@ -18,7 +19,7 @@
             <div class="input-group me-2" style="max-width: 300px;">
                 <input type="text" name="q" id="search-input" class="form-control" placeholder="請輸入關鍵字">
                 <button type="button" id="camera-scan-btn" class="btn btn-outline-secondary" title="掃描條碼" aria-label="掃描條碼">
-<i class="bi bi-camera"></i>
+                    <i class="bi bi-camera"></i>
                 </button>
             </div>
             <div class="d-flex flex-nowrap align-items-center gap-2 me-2">
@@ -38,21 +39,35 @@
         </div>
     </form>
     <div class="table-responsive" style="overflow-x: auto;">
-    <table class="table table-striped w-100" style="min-width: 900px;">
+    <table class="table table-striped w-100" style="min-width: auto; table-layout: fixed;">
+        <colgroup>
+            <col style="width: 65px;">
+            <col style="width: 200px;">
+            <col style="width: 120px;">
+            <col style="width: 120px;">
+            <col style="width: 100px;"> <!-- 國際條碼 -->
+            <col style="width: 100px;">
+            <col style="width: 100px;">
+            <col style="width: 100px;">
+            <col style="width: 100px;">
+            <col style="width: 100px;">
+            <col style="width: 100px;">
+            <col style="width: 120px;">
+        </colgroup>
         <thead>
             <tr>
+                <th></th>
+                <th>品名規格</th>
                 <th>產品編號</th>
                 <th>客戶端條碼</th>
-                <th>品名規格</th>
-                <th>產品類別</th>
+                <th class="text-center">國際條碼</th>
                 <th>售價A</th>
                 <th>售價B</th>
                 <th>標準進價</th>
-                <th>計量單位</th>
                 <th>建議售價</th>
                 <th>使用幣別</th>
-                <th>國際條碼</th>
-                <th>操作</th>
+                <th>計量單位</th>
+                <th>產品類別</th>
             </tr>
         </thead>
         <tbody id="product-table-body">
@@ -76,6 +91,20 @@
         </div>
     </div>
 </div>
+
+<!-- 國際條碼查看 Modal -->
+<div class="modal fade" id="barcodeModal" tabindex="-1" aria-labelledby="barcodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="barcodeModalLabel">國際條碼</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+      </div>
+      <div class="modal-body" id="barcodeModalBody" style="white-space: pre-line;"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -138,21 +167,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
+                <td>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="${editUrl}" class="btn btn-sm btn-primary">編輯</a>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id}, '${deleteUrl}')">刪除</button>
+                    </div>
+                </td>
+                <td>${p.name}</td>
                 <td>${p.code}</td>
                 <td>${p.customer_barcode || ''}</td>
-                <td>${p.name}</td>
-                <td>${p.category || ''}</td>
-                <td>${p.price_a}</td>
-                <td>${p.price_b}</td>
-                <td>${p.standard_cost}</td>
-                <td>${p.unit || ''}</td>
-                <td>${p.msrp}</td>
-                <td>${p.currency || ''}</td>
-                <td>${p.barcode || ''}</td>
-                <td>
-                    <a href="${editUrl}" class="btn btn-sm btn-primary">編輯</a>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id}, '${deleteUrl}')">刪除</button>
+                <td class="text-center">
+                    <button type="button" class="btn btn-link p-0 barcode-view-btn" data-barcode="${(p.barcode || '').replace(/"/g, '&quot;')}">
+                        <i class="bi bi-upc-scan fs-3" title="查看國際條碼"></i>
+                    </button>
                 </td>
+                <td>${Number(p.price_a).toFixed(2)}</td>
+                <td>${Number(p.price_b).toFixed(2)}</td>
+                <td>${Number(p.standard_cost).toFixed(2)}</td>
+                <td>${Number(p.msrp).toFixed(2)}</td>
+                <td>${p.currency || ''}</td>
+                <td>${p.unit || ''}</td>
+                <td>${p.category || ''}</td>
             `;
             tableBody.appendChild(tr);
         }
@@ -207,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('clear-search').addEventListener('click', () => {
         form.elements.q.value = '';
-        form.elements.field.value = 'all';
         currentQuery = '';
         currentField = 'all';
         currentPage = 1;
@@ -275,7 +309,19 @@ document.addEventListener('DOMContentLoaded', function() {
         Quagga.stop();
         scannerModal.style.display = 'none';
     });
+
+    // 綁定條碼 icon 按鈕點擊事件
+    document.body.addEventListener('click', function(e) {
+        if (e.target.closest('.barcode-view-btn')) {
+            const btn = e.target.closest('.barcode-view-btn');
+            const barcode = btn.getAttribute('data-barcode') || '';
+            document.getElementById('barcodeModalBody').textContent = barcode;
+            // 顯示 Bootstrap 5 modal
+            const modal = new bootstrap.Modal(document.getElementById('barcodeModal'));
+            modal.show();
+        }
     });
+});
 </script>
 <script src="{% static 'js/quagga.min.js' %}"></script>
 {% endblock %}

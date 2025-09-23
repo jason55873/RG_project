@@ -66,14 +66,15 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                商品型號（變化）
+                商品型號
             </div>
             {{ formset.management_form }}
             <div class="card-body" id="variant-formset">
                 {% for form in formset %}
                 <div class="border p-2 mb-2 variant-form bg-light d-flex align-items-center gap-2 flex-wrap">
                     {{ form.id }}
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-form').remove()">刪除</button>
+                    {{ form.DELETE }}
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteForm(this)">刪除</button>
                     {% for field in form.visible_fields %}
                         {% if field.name != 'DELETE' %}
                             <div>
@@ -94,7 +95,8 @@
         <template id="empty-form-template">
         <div class="border p-2 mb-2 variant-form bg-light d-flex align-items-center gap-2 flex-wrap">
             {{ formset.empty_form.id }}
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-form').remove()">刪除</button>
+            {{ formset.empty_form.DELETE }}
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteForm(this)">刪除</button>
             {% for field in formset.empty_form.visible_fields %}
                 {% if field.name != 'DELETE' %}
                 <div>
@@ -164,20 +166,70 @@ document.addEventListener("DOMContentLoaded", function() {
         invoiceNameField.value = nameField.value;
     });
 
+    // 載入時自動隱藏已被標記刪除的商品型號表單
+    document.querySelectorAll('.variant-form').forEach(div => {
+        const deleteInput = div.querySelector('input[type="checkbox"][name$="DELETE"]');
+        if (deleteInput && deleteInput.checked) {
+            div.style.setProperty('display', 'none', 'important');
+            div.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+
+        }
+    });
 
     // Inline formset JS
     window.totalForms = document.getElementById('id_details-TOTAL_FORMS');
     window.addForm = function() {
         const container = document.getElementById('variant-formset');
-        const templateNode = document.getElementById('empty-form-template');
-        const formIdx = parseInt(totalForms.value);
-        const templateHtml = templateNode.innerHTML.replace(/__prefix__/g, formIdx);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = templateHtml;
-        const newForm = tempDiv.firstElementChild;
-        container.appendChild(newForm);
-        totalForms.value = formIdx + 1;
+        // 檢查是否已有空白表單（barcode、code_suffix、value 都是空的且未被刪除）
+        const hasEmpty = Array.from(container.querySelectorAll('.variant-form')).some(div => {
+            const deleteInput = div.querySelector('input[type="checkbox"][name$="DELETE"]');
+            if (deleteInput && deleteInput.checked) return false;
+            const barcode = div.querySelector('input[name$="barcode"]').value.trim();
+            const codeSuffix = div.querySelector('input[name$="code_suffix"]').value.trim();
+            const value = div.querySelector('input[name$="value"]').value.trim();
+            return !barcode && !codeSuffix && !value;
+        });
+        if (!hasEmpty) {
+            const container = document.getElementById('variant-formset');
+            const templateNode = document.getElementById('empty-form-template');
+            const formIdx = parseInt(totalForms.value);
+            const templateHtml = templateNode.innerHTML.replace(/__prefix__/g, formIdx);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = templateHtml;
+            const newForm = tempDiv.firstElementChild;
+            container.appendChild(newForm);
+            totalForms.value = formIdx + 1;
+        }
     };
+
+    window.deleteForm = function(btn) {
+        const formDiv = btn.closest('.variant-form');
+        // 計算目前未被刪除（未勾選 DELETE）的表單數量
+        const allForms = document.querySelectorAll('.variant-form');
+        const notDeleted = Array.from(allForms).filter(div => {
+            const del = div.querySelector('input[type="checkbox"][name$="DELETE"]');
+            return !(del && del.checked);
+        });
+        if (notDeleted.length <= 1) {
+            alert('至少要保留一筆商品型號！');
+            return;
+        }
+        // 判斷 id 欄位有無值
+        const idInput = formDiv.querySelector('input[name$="id"]');
+        if (idInput && idInput.value) {
+            // 已存在資料，勾選 DELETE 並隱藏
+            const deleteInput = formDiv.querySelector('input[type="checkbox"][name$="DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                formDiv.style.setProperty('display', 'none', 'important');
+                formDiv.querySelectorAll('input, select, textarea').forEach(el => el.removeAttribute('required'));
+            };
+        } else {
+            // 新增的（還沒存進資料庫的）直接移除
+            formDiv.remove();
+            window.totalForms.value = document.querySelectorAll('.variant-form').length;
+        }
+    }
 });
 </script>
 {% endblock %}
