@@ -1,11 +1,13 @@
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 
-# Django
-/staticfiles/
-/media/
-/db.sqlite3
+# Django migration 編譯檔案（忽略編譯檔，但保留 .py）
+**/migrations/*.pyc
+**/migrations/__pycache__/
+**/migrations/*.py[cod]
+
 
 # VSCode
 .vscode/

@@ -6,8 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        exclude = ('content_type', 'object_id')  # 不讓前端傳這些
-
+        fields = ['id', 'code', 'address', 'postal_code', 'contact_person', 'contact_title', 'phone', 'fax', 'note']
 
 class SupplierCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,29 +21,39 @@ class CurrencySerializer(serializers.ModelSerializer):
 
 
 class SupplierSerializer(serializers.ModelSerializer):
-    addresses = AddressSerializer(many=True)
+    addresses = AddressSerializer(many=True, required=False)
 
     class Meta:
         model = Supplier
-        fields = '__all__'
+        fields = [
+            'id', 'code', 'full_name', 'category', 'currency', 'short_name', 'tax_id', 'invoice_title',
+            'responsible_person', 'contact_person', 'phone1', 'phone2', 'phone3', 'mobile', 'fax',
+            'purchaser', 'email', 'website', 'last_purchase_date', 'last_return_date', 'price_mode',
+            'tax_type', 'invoice_address', 'delivery_address', 'supplier_type', 'addresses'
+        ]
 
     def create(self, validated_data):
-        addresses_data = validated_data.pop('addresses')
+        addresses_data = validated_data.pop('addresses', [])
         supplier = Supplier.objects.create(**validated_data)
-        content_type = ContentType.objects.get_for_model(Supplier)
-        for addr_data in addresses_data:
-            Address.objects.create(content_object=supplier, **addr_data)
+        for address_data in addresses_data:
+            Address.objects.create(content_object=supplier, **address_data)
         return supplier
 
     def update(self, instance, validated_data):
-        addresses_data = validated_data.pop('addresses')
+        addresses_data = validated_data.pop('addresses', [])
         instance = super().update(instance, validated_data)
 
-        # 刪除原有地址並重建
-        content_type = ContentType.objects.get_for_model(Supplier)
-        Address.objects.filter(content_type=content_type, object_id=instance.pk).delete()
-        for addr_data in addresses_data:
-            Address.objects.create(content_object=instance, **addr_data)
+        # Update or create addresses
+        for address_data in addresses_data:
+            address_id = address_data.get('id')
+            if address_id:
+                address = Address.objects.get(id=address_id, content_object=instance)
+                for attr, value in address_data.items():
+                    setattr(address, attr, value)
+                address.save()
+            else:
+                Address.objects.create(content_object=instance, **address_data)
+
         return instance
     
 
