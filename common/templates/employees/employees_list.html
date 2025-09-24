@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+<h2>{% trans "人員列表" %}</h2>
+<div class="mb-3">
+  <a href="{% url 'employee_create' %}" class="btn btn-success">{% trans "新增人員" %}</a>
+</div>
+<table class="table table-striped" id="employee-table" data-ajax-url="{% url 'listEmployeesAjax' %}">
+  <thead>
+    <tr>
+      <th>{% trans "編號" %}</th>
+      <th>{% trans "姓名" %}</th>
+      <th>{% trans "英文姓名" %}</th>
+      <th>{% trans "部門" %}</th>
+      <th>{% trans "職稱" %}</th>
+      <th>{% trans "帳號" %}</th>
+      <th>{% trans "操作" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- 由 JS 動態產生 -->
+  </tbody>
+</table>
+<link rel="stylesheet" href="{% static 'employees/employee_list.css' %}">
+<script>
+  window.csrfToken = "{{ csrf_token }}";
+</script>
+<script src="{% static 'employees/employee_list.js' %}"></script>
+{% endblock %}

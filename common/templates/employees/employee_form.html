@@ -17,7 +17,9 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
-                    <label for="id_username" class="col-sm-4 col-form-label">{% trans "帳號" %}</label>
+                    <label for="id_username" class="col-sm-4 col-form-label required" required>
+                      {% trans "帳號" %}
+                    </label>
                     <div class="col-sm-8">
                       {% if form.instance.pk %}
                         <input type="text" name="username" id="id_username" class="form-control" value="{{ username }}" readonly>
@@ -90,7 +92,7 @@
             </fieldset>
 
             <div class="d-flex justify-content-between">
-              <a href="{% url 'employee_list' %}" class="btn btn-secondary">{% trans "取消" %}</a>
+              <a href="{% url 'employeesPage' %}" class="btn btn-secondary">{% trans "取消" %}</a>
               <button type="submit" class="btn btn-success">
                 {% if form.instance.pk %}
                   {% trans "修改" %}

@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import inlineformset_factory, modelformset_factory
@@ -30,14 +31,84 @@ from .forms import (
     ProductDetailForm
 )
 
-# 員工 Employee CRUD 視圖
+#員工
+@login_required
+@permission_required('common.view_employee', raise_exception=True)
+def employeesPage(request):
+    return render(request, 'employees/employees_list.html')
+
 
 @login_required
 @permission_required('common.view_employee', raise_exception=True)
-def employee_list(request):
+def listEmployeesAjax(request):
+    employees = Employee.objects.filter(is_deleted=False).values('id', 'employee_id', 'name_chinese', 'name_english', 'profile__department__name', 'profile__title_chinese', 'user__username')
+    return JsonResponse(list(employees), safe=False)
 
-    employees = Employee.objects.filter(is_deleted=False)
-    return render(request, 'employees/employee_list.html', {'employees': employees})
+
+@login_required
+@permission_required('common.add_employee', raise_exception=True)
+def createEmployee(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+        username = data.get('username', '')
+        # 取得下一個員工編號
+        last_emp = Employee.objects.order_by('-id').first()
+        if last_emp:
+            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+        else:
+            next_emp_id = "001"
+
+        form = EmployeeForm(data)
+        form.fields['employee_id'].widget.attrs['readonly'] = True
+        profile_form = EmployeeProfileForm(data)
+        contact_form = EmployeeContactForm(data)
+        if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
+            employee = form.save(commit=False)
+            employee.employee_id = next_emp_id
+            employee.save()
+            profile = profile_form.save(commit=False)
+            profile.employee = employee
+            profile.save()
+            contact = contact_form.save(commit=False)
+            contact.employee = employee
+            contact.save()
+            user = User.objects.create_user(
+                username=username,
+                first_name=employee.name_chinese,
+                password=employee.employee_id
+            )
+            employee.user = user
+            employee.save()
+            return JsonResponse({'success': True, 'employee_id': employee.id})
+        else:
+            errors = {
+                'form': form.errors,
+                'profile_form': profile_form.errors,
+                'contact_form': contact_form.errors,
+            }
+            return JsonResponse({'success': False, 'errors': errors}, status=400)
+    else:
+        last_emp = Employee.objects.order_by('-id').first()
+        if last_emp:
+            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+        else:
+            next_emp_id = "001"
+
+        form = EmployeeForm(initial={'employee_id': next_emp_id})
+        form.fields['employee_id'].widget.attrs['readonly'] = True
+        profile_form = EmployeeProfileForm()
+        contact_form = EmployeeContactForm()
+    return render(request, 'employees/employee_form.html', {
+        'form': form,
+        'profile_form': profile_form,
+        'contact_form': contact_form,
+        'username': username,
+    })
+
+
 
 @login_required
 @permission_required('common.add_employee', raise_exception=True)
@@ -72,7 +143,7 @@ def employee_create(request):
             )
             employee.user = user
             employee.save()
-            return redirect('employee_list')
+            return redirect('employeesPage')
     else:
         last_emp = Employee.objects.order_by('-id').first()
         if last_emp:
@@ -107,7 +178,7 @@ def employee_update(request, pk):
             form.save()
             profile_form.save()
             contact_form.save()
-            return redirect('employee_list')
+            return redirect('employeesPage')
     else:
         form = EmployeeForm(instance=employee)
         profile_form = EmployeeProfileForm(instance=profile)
@@ -130,7 +201,7 @@ def employee_delete(request, pk):
         if employee.user:
             employee.user.is_active = False
             employee.user.save()
-        return redirect('employee_list')
+        return redirect('employeesPage')
     return render(request, 'employees/employee_confirm_delete.html', {'employee': employee})
 
 def custom_login(request):

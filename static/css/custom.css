@@ -36,3 +36,7 @@ label.required:before {
 input[type="checkbox"][name$="DELETE"] {
   display: none;
 }
+
+.min-vh-60 {
+  min-height: 60vh;
+}

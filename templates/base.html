@@ -4,19 +4,19 @@
   <head>
   {% load i18n %}
   {% load static %}
-  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% trans "立鉅ERP系統" %}{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />
-  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-  <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+  <script src="{% static 'jquery/jquery.min.js' %}"></script>
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'jquery/jquery.min.js' %}"></script>
   <script src="{% static 'select2/js/select2.min.js' %}"></script>
-  <link href="{% static 'select2/css/select2.min.css' %}" rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />
+  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+  <link rel="stylesheet" href="{% static 'select2/css/select2.min.css' %}"  />
   {% block extra_head %}{% endblock %}
 </head>
 
@@ -31,10 +31,12 @@
           </button>
           <ul class="dropdown-menu" aria-labelledby="sharedDataDropdown">
             <li class="dropdown-submenu dropend">
-              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "基本資料設定" %}</a>
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-gear"></i> {% trans "基本資料設定" %}
+              </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a class="dropdown-item" href="{% url 'employee_list' %}">
+                  <a class="dropdown-item" href="{% url 'employeesPage' %}">
                     <i class="bi bi-person-lines-fill"></i> {% trans "人員資料" %}
                   </a>
                 </li>
@@ -71,7 +73,9 @@
               </ul>
             </li>
             <li class="dropdown-submenu dropend">
-              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "產品資料設定" %}</a>
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-boxes"></i> {% trans "產品資料設定" %}
+              </a>
               <ul class="dropdown-menu">
                 <li>
                   <a class="dropdown-item" href="{% url 'warehouse_list' %}">
@@ -98,17 +102,21 @@
           </button>
           <ul class="dropdown-menu" aria-labelledby="orderManagementDropdown">
             <li class="dropdown-submenu dropend">
-              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "採購作業" %}</a>
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-cart-check"></i> {% trans "採購作業" %}
+              </a>
               <ul class="dropdown-menu">
                 <li>
                   <a class="dropdown-item" href="{% url 'purchasevoucher_list' %}">
-                    <i class="bi bi-person-lines-fill"></i> {% trans "採購憑單" %}
+                    <i class="bi bi-file-earmark-text"></i> {% trans "採購憑單" %}
                   </a>
                 </li>
               </ul>
             </li>
             <li class="dropdown-submenu dropend">
-              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">{% trans "訂單作業" %}</a>
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-receipt"></i>{% trans "訂單作業" %}
+              </a>
               <ul class="dropdown-menu">
               </ul>
             </li>
@@ -124,7 +132,7 @@
         {% endif %}
         <div class="dropdown">
           <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans '語言' %}">
-            <i class="bi bi-globe"></i>
+            <i class="bi bi-translate"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
             <li>
@@ -162,27 +170,9 @@
   </div>
 
   <footer class="text-center mt-4 mb-2">
-    <small>&copy; 2025</small>
+    <small>&copy;{% trans "2025 立鉅ERP系統" %}</small>
   </footer>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const dropdownToggles = document.querySelectorAll('.dropdown-submenu .dropdown-toggle');
-      dropdownToggles.forEach(function (el) {
-        el.addEventListener('mouseenter', function (e) {
-          let submenu = el.nextElementSibling;
-          if (submenu && submenu.classList.contains('dropdown-menu')) {
-            submenu.classList.add('show');
-          }
-        });
-        el.parentElement.addEventListener('mouseleave', function () {
-          let submenu = el.nextElementSibling;
-          if (submenu && submenu.classList.contains('dropdown-menu')) {
-            submenu.classList.remove('show');
-          }
-        });
-      });
-    });
-  </script>
+  <script src="{% static 'js/dropdown.js' %}"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
