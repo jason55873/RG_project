@@ -5,7 +5,7 @@ urlpatterns = [
     # 人員資料
     path('employees/', views.employeesPage, name='employeesPage'),
     path('employees/list', views.listEmployeesAjax, name='listEmployeesAjax'),
-    path('employees/add/', views.employee_create, name='employee_create'),
+    path('employees/add/', views.createEmpolyeeAjax, name='createEmpolyeeAjax'),
     path('employees/<int:pk>/edit/', views.employee_update, name='employee_update'),
     path('employees/<int:pk>/delete/', views.employee_delete, name='employee_delete'),
 

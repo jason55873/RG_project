@@ -18,17 +18,27 @@ from .models import (
     ProductDetail
 )
 
-class EmployeeForm(forms.ModelForm):
+class BootstrapMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            # select 用 form-select，其餘用 form-control
+            if getattr(field.widget, 'input_type', None) == 'select' or field.widget.__class__.__name__ in ['Select', 'SelectMultiple']:
+                field.widget.attrs.update({'class': 'form-select'})
+            else:
+                field.widget.attrs.update({'class': 'form-control'})
+
+class EmployeeForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Employee
         exclude = ['user', 'is_deleted']
 
-class EmployeeProfileForm(forms.ModelForm):
+class EmployeeProfileForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = EmployeeProfile
         exclude = ['employee']
 
-class EmployeeContactForm(forms.ModelForm):
+class EmployeeContactForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = EmployeeContact
         exclude = ['employee']
