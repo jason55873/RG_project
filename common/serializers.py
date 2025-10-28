@@ -58,7 +58,31 @@ class SupplierSerializer(serializers.ModelSerializer):
     
 
 # 員工序列化
-class EmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Employee
-        fields = ['id', 'employee_id', 'name_chinese']
+from .domain.entities import Employee as EmployeeEntity
+from rest_framework import serializers
+
+class EmployeeSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+    employee_id = serializers.CharField(required=False, allow_null=True)
+    employee_name = serializers.CharField()
+    gender = serializers.CharField()
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    birth = serializers.DateField()
+    email = serializers.EmailField()
+    mobile = serializers.CharField()
+    national_id = serializers.CharField()
+    department_id = serializers.IntegerField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_null=True)
+    is_deleted = serializers.BooleanField(default=False)
+    military_status = serializers.CharField(required=False, allow_null=True)
+    hire_date = serializers.DateField(required=False, allow_null=True)
+    resignation_date = serializers.DateField(required=False, allow_null=True)
+    blood_type = serializers.CharField(required=False, allow_null=True)
+    contact_address = serializers.CharField(required=False, allow_null=True)
+    household_address = serializers.CharField(required=False, allow_null=True)
+    telephone = serializers.CharField(required=False, allow_null=True)
+    emergency_contact_name = serializers.CharField(required=False, allow_null=True)
+    emergency_contact_address = serializers.CharField(required=False, allow_null=True)
+    emergency_contact_mobile = serializers.CharField(required=False, allow_null=True)
+    emergency_contact_phone = serializers.CharField(required=False, allow_null=True)

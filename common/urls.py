@@ -1,13 +1,29 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .presentation.views import EmployeeViewSet  # 修正 import 位置
 from . import views
+from .presentation import views as emp_views
+
+router = DefaultRouter()
+router.register(r'api/employees', EmployeeViewSet, basename='employee')
+
+# urls.py
 
 urlpatterns = [
+    # DRF API
+    *router.urls,
     # 人員資料
-    path('employees/', views.employeesPage, name='employeesPage'),
-    path('employees/list', views.listEmployeesAjax, name='listEmployeesAjax'),
-    path('employees/add/', views.createEmpolyeeAjax, name='createEmpolyeeAjax'),
-    path('employees/<int:pk>/edit/', views.employee_update, name='employee_update'),
-    path('employees/<int:pk>/delete/', views.employee_delete, name='employee_delete'),
+    path('employees/', emp_views.employeesPage, name='employeesPage'),
+    path('employees/create/', emp_views.employee_create, name='createEmployeeAjax'),
+    # path('employees/list/', emp_views.employee_list, name='listEmployeesAjax'),
+    # path('employees/create/', emp_views.employee_create, name='createEmployeeAjax'),
+    # path('employees/<int:pk>/update/', emp_views.employee_update, name='updateEmployeeAjax'),
+    # path('employees/<int:pk>/delete/', emp_views.employee_delete, name='deleteEmployeeAjax'),
+    # path('employees/', views.employeesPage, name='employeesPage'),
+    # path('employees/list', views.listEmployeesAjax, name='listEmployeesAjax'),
+    # path('employees/add/', views.createEmpolyeeAjax, name='createEmpolyeeAjax'),
+    # path('employees/<int:pk>/edit/', views.employee_update, name='employee_update'),
+    # path('employees/<int:pk>/delete/', views.employee_delete, name='employee_delete'),
 
     # 部門資料
     path('departments/', views.department_list, name='department_list'),

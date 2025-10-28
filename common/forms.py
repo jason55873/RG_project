@@ -3,8 +3,6 @@ from django import forms
 from django.forms import BaseInlineFormSet
 from .models import (
     Employee,
-    EmployeeProfile,
-    EmployeeContact,
     Department,
     Warehouse,
     ProductCategory,
@@ -22,26 +20,40 @@ class BootstrapMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            # select 用 form-select，其餘用 form-control
+            # 保留現有的 attrs，只更新 class
+            existing_class = field.widget.attrs.get('class', '')
+            
             if getattr(field.widget, 'input_type', None) == 'select' or field.widget.__class__.__name__ in ['Select', 'SelectMultiple']:
-                field.widget.attrs.update({'class': 'form-select'})
+                new_class = 'form-select'
             else:
-                field.widget.attrs.update({'class': 'form-control'})
+                new_class = 'form-control'
+            
+            # 合併 class，但保留其他所有 attributes（如 type: 'date'）
+            if existing_class:
+                field.widget.attrs['class'] = f"{existing_class} {new_class}".strip()
+            else:
+                field.widget.attrs['class'] = new_class
+
 
 class EmployeeForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Employee
         exclude = ['user', 'is_deleted']
 
-class EmployeeProfileForm(BootstrapMixin, forms.ModelForm):
-    class Meta:
-        model = EmployeeProfile
-        exclude = ['employee']
+# class EmployeeProfileForm(BootstrapMixin, forms.ModelForm):
+#     class Meta:
+#         model = EmployeeProfile
+#         exclude = ['employee']
+#         # widgets = {
+#         #     'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+#         #     'hire_date': forms.DateInput(attrs={'type': 'date'}),
+#         #     'resignation_date': forms.DateInput(attrs={'type': 'date'}),
+#         # }   
 
-class EmployeeContactForm(BootstrapMixin, forms.ModelForm):
-    class Meta:
-        model = EmployeeContact
-        exclude = ['employee']
+# class EmployeeContactForm(BootstrapMixin, forms.ModelForm):
+#     class Meta:
+#         model = EmployeeContact
+#         exclude = ['employee']
 
 class DepartmentForm(forms.ModelForm):
     class Meta:

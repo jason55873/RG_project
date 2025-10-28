@@ -15,8 +15,6 @@ from rest_framework import viewsets
 from .serializers import SupplierSerializer, SupplierCategorySerializer, CurrencySerializer, AddressSerializer
 from .forms import (
     EmployeeForm,
-    EmployeeProfileForm,
-    EmployeeContactForm,
     DepartmentForm,
     WarehouseForm,
     ProductCategoryForm,
@@ -45,86 +43,86 @@ def listEmployeesAjax(request):
     return JsonResponse(list(employees), safe=False)
 
 
-@login_required
-@permission_required('common.add_employee', raise_exception=True)
-def createEmpolyeeAjax(request):
-    username = request.POST.get('username', '') if request.method == 'POST' else ''
-    if request.method == 'POST':
-        last_emp = Employee.objects.order_by('-id').first()
-        if last_emp:
-            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
-        else:
-            next_emp_id = "001"
+# @login_required
+# @permission_required('common.add_employee', raise_exception=True)
+# def createEmpolyeeAjax(request):
+#     username = request.POST.get('username', '') if request.method == 'POST' else ''
+#     if request.method == 'POST':
+#         last_emp = Employee.objects.order_by('-id').first()
+#         if last_emp:
+#             next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+#         else:
+#             next_emp_id = "001"
 
-        form = EmployeeForm(request.POST)
-        form.fields['employee_id'].widget.attrs['readonly'] = True
-        profile_form = EmployeeProfileForm(request.POST)
-        contact_form = EmployeeContactForm(request.POST)
-        if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
-            employee = form.save(commit=False)
-            employee.employee_id = next_emp_id
-            employee.save()
-            profile = profile_form.save(commit=False)
-            profile.employee = employee
-            profile.save()
-            contact = contact_form.save(commit=False)
-            contact.employee = employee
-            contact.save()
-            # 建立對應 User 帳號
-            user = User.objects.create_user(
-                username=username,
-                first_name=employee.name_chinese,
-                password=employee.employee_id  # 預設密碼為員工編號，可改為亂數或表單輸入
-            )
-            employee.user = user
-            employee.save()
-            return redirect('employeesPage')
-    else:
-        last_emp = Employee.objects.order_by('-id').first()
-        if last_emp:
-            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
-        else:
-            next_emp_id = "001"
+#         form = EmployeeForm(request.POST)
+#         form.fields['employee_id'].widget.attrs['readonly'] = True
+#         profile_form = EmployeeProfileForm(request.POST)
+#         contact_form = EmployeeContactForm(request.POST)
+#         if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
+#             employee = form.save(commit=False)
+#             employee.employee_id = next_emp_id
+#             employee.save()
+#             profile = profile_form.save(commit=False)
+#             profile.employee = employee
+#             profile.save()
+#             contact = contact_form.save(commit=False)
+#             contact.employee = employee
+#             contact.save()
+#             # 建立對應 User 帳號
+#             user = User.objects.create_user(
+#                 username=username,
+#                 first_name=employee.name_chinese,
+#                 password=employee.employee_id  # 預設密碼為員工編號，可改為亂數或表單輸入
+#             )
+#             employee.user = user
+#             employee.save()
+#             return redirect('employeesPage')
+#     else:
+#         last_emp = Employee.objects.order_by('-id').first()
+#         if last_emp:
+#             next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+#         else:
+#             next_emp_id = "001"
 
-        form = EmployeeForm(initial={'employee_id': next_emp_id})
-        form.fields['employee_id'].widget.attrs['readonly'] = True
-        form.fields['employee_id'].widget.attrs['class'] = 'form-control-plaintext'
-        profile_form = EmployeeProfileForm()
-        contact_form = EmployeeContactForm()
-    return render(request, 'employees/employee_form.html', {
-        'form': form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
-        'username': username,
-    })
+#         form = EmployeeForm(initial={'employee_id': next_emp_id})
+#         form.fields['employee_id'].widget.attrs['readonly'] = True
+#         form.fields['employee_id'].widget.attrs['class'] = 'form-control-plaintext'
+#         profile_form = EmployeeProfileForm()
+#         contact_form = EmployeeContactForm()
+#     return render(request, 'employees/employee_form.html', {
+#         'form': form,
+#         'profile_form': profile_form,
+#         'contact_form': contact_form,
+#         'username': username,
+#     })
 
-@login_required
-@permission_required('common.change_employee', raise_exception=True)
-def employee_update(request, pk):
-    employee = get_object_or_404(Employee, pk=pk)
-    profile = getattr(employee, 'profile', None)
-    contact = getattr(employee, 'contact', None)
-    username = employee.user.username if employee.user else ''
+# @login_required
+# @permission_required('common.change_employee', raise_exception=True)
+# def employee_update(request, pk):
+#     employee = get_object_or_404(Employee, pk=pk)
+#     profile = getattr(employee, 'profile', None)
+#     contact = getattr(employee, 'contact', None)
+#     username = employee.user.username if employee.user else ''
 
-    if request.method == 'POST':
-        form = EmployeeForm(request.POST, instance=employee)
-        profile_form = EmployeeProfileForm(request.POST, instance=profile)
-        contact_form = EmployeeContactForm(request.POST, instance=contact)
-        if form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
-            form.save()
-            profile_form.save()
-            contact_form.save()
-            return redirect('employeesPage')
-    else:
-        form = EmployeeForm(instance=employee)
-        profile_form = EmployeeProfileForm(instance=profile)
-        contact_form = EmployeeContactForm(instance=contact)
-    return render(request, 'employees/employee_form.html', {
-        'form': form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
-        'username': username,
-    })
+#     if request.method == 'POST':
+#         form = EmployeeForm(request.POST, instance=employee)
+#         profile_form = EmployeeProfileForm(request.POST, instance=profile)
+#         contact_form = EmployeeContactForm(request.POST, instance=contact)
+#         if form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
+#             form.save()
+#             profile_form.save()
+#             contact_form.save()
+#             return redirect('employeesPage')
+#     else:
+#         form = EmployeeForm(instance=employee)
+#         profile_form = EmployeeProfileForm(instance=profile)
+#         contact_form = EmployeeContactForm(instance=contact)
+#     return render(request, 'employees/employee_form.html', {
+#         'form': form,
+#         'profile_form': profile_form,
+#         'contact_form': contact_form,
+#         'username': username,
+#     })
 
 
 @login_required

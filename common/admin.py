@@ -1,27 +1,12 @@
 from django.contrib import admin
-from .models import Employee, EmployeeProfile, EmployeeContact
+from .models import Employee, Department
 
-# Inline for 基本資料
-class EmployeeProfileInline(admin.StackedInline):
-    model = EmployeeProfile
-    can_delete = False
-    verbose_name_plural = "基本資料"
-    fk_name = 'employee'
-
-# Inline for 通訊資料
-class EmployeeContactInline(admin.StackedInline):
-    model = EmployeeContact
-    can_delete = False
-    verbose_name_plural = "通訊資料"
-    fk_name = 'employee'
-
-# 主檔 Employee 的管理介面
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'name_chinese', 'gender', 'name_english')
-    search_fields = ('employee_id', 'name_chinese', 'name_english')
-    inlines = [EmployeeProfileInline, EmployeeContactInline]
+    list_display = ('employee_id', 'employee_name', 'department', 'email')
+    search_fields = ('employee_id', 'employee_name')
 
-# 可選：如果你想讓這兩張表無法單獨編輯（只透過 inline 編輯），就不用註冊它們：
-# admin.site.register(EmployeeProfile)
-# admin.site.register(EmployeeContact)
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('dept_no', 'dept_name', 'parent_dept')
+    search_fields = ('dept_no', 'dept_name')
