@@ -6,7 +6,13 @@
     <div class="col-md-10 col-lg-8">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">{% trans "新增員工" %}</h2>
+          <h2 class="mb-0">
+            {% if form.instance.id %}
+              {% trans "編輯員工資料" %}
+            {% else %}
+              {% trans "新增員工資料" %}
+            {% endif %}
+          </h2>
         </div>
         <div class="card-body">
           <form method="post">
@@ -14,10 +20,8 @@
             {% if errors %}
             <div class="alert alert-danger">
               <ul class="mb-0">
-                {% for field, error_list in errors.items %}
-                  {% for error in error_list %}
-                    <li>{{ field }}: {{ error }}</li>
-                  {% endfor %}
+                {% for error in errors %}
+                    <li>{{ error }}</li>
                 {% endfor %}
               </ul>
             </div>
@@ -33,6 +37,7 @@
                     </div>
                   </div>
                 </div>
+                {% if not form.instance.id %}
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
                     <label for="id_password" class="col-sm-4 col-form-label required">{% trans "密碼" %}</label>
@@ -41,6 +46,7 @@
                     </div>
                   </div>
                 </div>
+                {% endif %}
                 <div class="col-md-6 mb-3">
                   <div class="row align-items-center">
                     <label for="id_employee_name" class="col-sm-4 col-form-label required">{% trans "姓名" %}</label>
@@ -73,7 +79,7 @@
                   <div class="row align-items-center">
                     <label for="id_birth" class="col-sm-4 col-form-label required">{% trans "生日" %}</label>
                     <div class="col-sm-8">
-                      <input type="date" name="birth" id="id_birth" class="form-control" value="{{ form.birth.value|date:'Y-m-d'|default_if_none:'' }}" required>
+                      <input type="date" name="birth" id="id_birth" class="form-control" value="{{ form.birth.value|default_if_none:'' }}" required>
                     </div>
                   </div>
                 </div>
@@ -128,7 +134,7 @@
                   <div class="row align-items-center">
                     <label for="id_hire_date" class="col-sm-4 col-form-label">{% trans "到職日" %}</label>
                     <div class="col-sm-8">
-                      <input type="date" name="hire_date" id="id_hire_date" class="form-control" value="{{ form.hire_date.value|date:'Y-m-d'|default_if_none:'' }}">
+                      <input type="date" name="hire_date" id="id_hire_date" class="form-control" value="{{ form.hire_date.value|default_if_none:'' }}">
                     </div>
                   </div>
                 </div>
@@ -136,7 +142,7 @@
                   <div class="row align-items-center">
                     <label for="id_resignation_date" class="col-sm-4 col-form-label">{% trans "離職日" %}</label>
                     <div class="col-sm-8">
-                      <input type="date" name="resignation_date" id="id_resignation_date" class="form-control" value="{{ form.resignation_date.value|date:'Y-m-d'|default_if_none:'' }}">
+                      <input type="date" name="resignation_date" id="id_resignation_date" class="form-control" value="{{ form.resignation_date.value|default_if_none:'' }}">
                     </div>
                   </div>
                 </div>
@@ -209,7 +215,7 @@
             <div class="d-flex justify-content-between">
               <a href="{% url 'employeesPage' %}" class="btn btn-secondary">{% trans "取消" %}</a>
               <button type="submit" class="btn btn-success">
-                {% if form.instance.pk %}
+                {% if form.instance.id %}
                   {% trans "修改" %}
                 {% else %}
                   {% trans "新增" %}

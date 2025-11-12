@@ -39,7 +39,7 @@ def employeesPage(request):
 @login_required
 @permission_required('common.view_employee', raise_exception=True)
 def listEmployeesAjax(request):
-    employees = Employee.objects.filter(is_deleted=False).values('id', 'employee_id', 'name_chinese', 'name_english', 'profile__department__name', 'profile__title_chinese', 'user__username')
+    employees = Employee.objects.filter(is_deleted=False).values('id', 'employee_no', 'name_chinese', 'name_english', 'profile__department__name', 'profile__title_chinese', 'user__username')
     return JsonResponse(list(employees), safe=False)
 
 
@@ -50,17 +50,17 @@ def listEmployeesAjax(request):
 #     if request.method == 'POST':
 #         last_emp = Employee.objects.order_by('-id').first()
 #         if last_emp:
-#             next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+#             next_emp_id = f"{int(last_emp.employee_no) + 1:03d}"
 #         else:
 #             next_emp_id = "001"
 
 #         form = EmployeeForm(request.POST)
-#         form.fields['employee_id'].widget.attrs['readonly'] = True
+#         form.fields['employee_no'].widget.attrs['readonly'] = True
 #         profile_form = EmployeeProfileForm(request.POST)
 #         contact_form = EmployeeContactForm(request.POST)
 #         if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
 #             employee = form.save(commit=False)
-#             employee.employee_id = next_emp_id
+#             employee.employee_no = next_emp_id
 #             employee.save()
 #             profile = profile_form.save(commit=False)
 #             profile.employee = employee
@@ -72,7 +72,7 @@ def listEmployeesAjax(request):
 #             user = User.objects.create_user(
 #                 username=username,
 #                 first_name=employee.name_chinese,
-#                 password=employee.employee_id  # 預設密碼為員工編號，可改為亂數或表單輸入
+#                 password=employee.employee_no  # 預設密碼為員工編號，可改為亂數或表單輸入
 #             )
 #             employee.user = user
 #             employee.save()
@@ -80,13 +80,13 @@ def listEmployeesAjax(request):
 #     else:
 #         last_emp = Employee.objects.order_by('-id').first()
 #         if last_emp:
-#             next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
+#             next_emp_id = f"{int(last_emp.employee_no) + 1:03d}"
 #         else:
 #             next_emp_id = "001"
 
-#         form = EmployeeForm(initial={'employee_id': next_emp_id})
-#         form.fields['employee_id'].widget.attrs['readonly'] = True
-#         form.fields['employee_id'].widget.attrs['class'] = 'form-control-plaintext'
+#         form = EmployeeForm(initial={'employee_no': next_emp_id})
+#         form.fields['employee_no'].widget.attrs['readonly'] = True
+#         form.fields['employee_no'].widget.attrs['class'] = 'form-control-plaintext'
 #         profile_form = EmployeeProfileForm()
 #         contact_form = EmployeeContactForm()
 #     return render(request, 'employees/employee_form.html', {

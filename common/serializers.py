@@ -62,12 +62,17 @@ from .domain.entities import Employee as EmployeeEntity
 from rest_framework import serializers
 
 class EmployeeSerializer(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self, 'instance', None):  # 修改時（有 instance）密碼不是必填
+            self.fields['password'].required = False
+    
     id = serializers.IntegerField(required=False)
-    employee_id = serializers.CharField(required=False, allow_null=True)
+    employee_no = serializers.CharField(required=False, allow_null=True)
     employee_name = serializers.CharField()
     gender = serializers.CharField()
     username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(required=True, write_only=True)
     birth = serializers.DateField()
     email = serializers.EmailField()
     mobile = serializers.CharField()

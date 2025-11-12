@@ -268,7 +268,7 @@ function initPage() {
         data.employees.forEach(emp => {
           const opt = document.createElement('option');
           opt.value = emp.id;
-          opt.textContent = emp.employee_id + " - " + emp.name_chinese;
+          opt.textContent = emp.employee_no + " - " + emp.name_chinese;
           select.appendChild(opt);
         });
       });

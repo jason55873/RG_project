@@ -9,7 +9,7 @@ const csrfToken = getCsrfToken();
 const lang = getCurrentLang();
 
 document.addEventListener('DOMContentLoaded', function() {
-  fetch(`/${lang}/common/api/employees/`)
+  fetch(`/${lang}/common/employees/list/`)
     .then(response => response.json())
     .then(data => {
       const tbody = document.querySelector('#employee-table tbody');
@@ -17,14 +17,14 @@ document.addEventListener('DOMContentLoaded', function() {
       data.forEach(emp => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${emp.employee_id}</td>
+          <td>${emp.employee_no}</td>
           <td>${emp.username || ''}</td>
           <td>${emp.email || ''}</td>
           <td>${emp.employee_name || ''}</td>
           <td>${emp.title || ''}</td>
           <td>${emp.department_id || ''}</td>
           <td>
-            <a href="/employees/${emp.id}/update/" class="btn btn-sm btn-primary">編輯</a>
+            <a href="/${lang}/common/employees/${emp.id}/update/" class="btn btn-sm btn-primary">編輯</a>
             <button class="btn btn-sm btn-danger delete-btn" data-id="${emp.id}">刪除</button>
           </td>
         `;

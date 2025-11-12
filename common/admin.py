@@ -3,8 +3,8 @@ from .models import Employee, Department
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'employee_name', 'department', 'email')
-    search_fields = ('employee_id', 'employee_name')
+    list_display = ('employee_no', 'employee_name', 'department', 'email')
+    search_fields = ('employee_no', 'employee_name')
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):

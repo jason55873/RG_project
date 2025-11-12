@@ -31,7 +31,7 @@ class Department(models.Model):
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='employee', verbose_name=_("帳號"))
-    employee_id = models.CharField(max_length=20, unique=True, verbose_name=_("人員編號"))
+    employee_no = models.CharField(max_length=20, unique=True, verbose_name=_("人員編號"))
     employee_name = models.CharField(max_length=50, verbose_name=_("人員姓名"))
     gender = models.CharField(
         max_length=1,
@@ -66,7 +66,7 @@ class Employee(models.Model):
     emergency_contact_phone = models.CharField(max_length=20, verbose_name=_("緊急聯絡人市話"), blank=True, null=True)
 
     def __str__(self):
-        return f"{self.employee_id} - {self.employee_name}"
+        return f"{self.employee_no} - {self.employee_name}"
 
 
 class Warehouse(models.Model):

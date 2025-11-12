@@ -9,7 +9,7 @@ class Employee:
     username: str
     password: Optional[str] = None
     id: Optional[int] = None
-    employee_id: Optional[str] = None
+    employee_no: Optional[str] = None
     birth: Optional[str] = None
     email: Optional[str] = None
     mobile: Optional[str] = None

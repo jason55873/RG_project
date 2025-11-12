@@ -65,26 +65,54 @@ class DepartmentRepository:
         ]
 
 class EmployeeRepository:
+    def find_duplicates(self, username=None, email=None, national_id=None, employee_no=None, exclude_id=None):
+        from django.db.models import Q
+        q = Q()
+        if username:
+            q |= Q(user__username=username)
+        if email:
+            q |= Q(email=email)
+        if national_id:
+            q |= Q(national_id=national_id)
+        if employee_no:
+            q |= Q(employee_no=employee_no)
+        if not q:
+            return {}
+        qs = EmployeeModel.objects.filter(q, is_deleted=False)
+        if exclude_id:
+            qs = qs.exclude(id=exclude_id)
+        result = {}
+        for emp in qs:
+            if username and emp.user and emp.user.username == username:
+                result['username'] = True
+            if email and emp.email == email:
+                result['email'] = True
+            if national_id and emp.national_id == national_id:
+                result['national_id'] = True
+            if employee_no and emp.employee_no == employee_no:
+                result['employee_no'] = True
+        return result
+    
     def create(self, employee: Employee, username: str, password: str) -> Employee:
         with transaction.atomic():
             if not username or not password:
                 raise ValueError(_("帳號 和 密碼 為必填！"))
-            if not employee.employee_id:
-                last_emp = EmployeeModel.objects.filter().order_by('-employee_id').first()
-                if last_emp and str(last_emp.employee_id).isdigit():
-                    next_id = int(last_emp.employee_id) + 1
+            if not employee.employee_no:
+                last_emp = EmployeeModel.objects.filter().order_by('-employee_no').first()
+                if last_emp and str(last_emp.employee_no).isdigit():
+                    next_id = int(last_emp.employee_no) + 1
                 else:
                     next_id = 1
-                employee_id = f"{next_id:05d}"
+                employee_no = f"{next_id:05d}"
             else:
-                employee_id = employee.employee_id
+                employee_no = employee.employee_no
             user_obj = User.objects.create_user(
                 username=username,
                 password=password,
                 first_name=employee.employee_name
             )
             emp = EmployeeModel.objects.create(
-                employee_id=employee_id,
+                employee_no=employee_no,
                 employee_name=employee.employee_name,
                 gender=employee.gender,
                 birth=employee.birth,
@@ -109,7 +137,7 @@ class EmployeeRepository:
             )
             return Employee(
                 id=emp.id,
-                employee_id=emp.employee_id,
+                employee_no=emp.employee_no,
                 employee_name=emp.employee_name,
                 gender=emp.gender,
                 username=username,
@@ -136,7 +164,7 @@ class EmployeeRepository:
 
     def update(self, employee: Employee) -> Employee:
         emp = EmployeeModel.objects.get(id=employee.id)
-        emp.employee_id = employee.employee_id
+        emp.employee_no = employee.employee_no
         emp.employee_name = employee.employee_name
         emp.gender = employee.gender
         emp.birth = employee.birth
@@ -160,7 +188,7 @@ class EmployeeRepository:
         emp.save()
         return Employee(
             id=emp.id,
-            employee_id=emp.employee_id,
+            employee_no=emp.employee_no,
             employee_name=emp.employee_name,
             gender=emp.gender,
             username=getattr(employee, 'username', None),
@@ -185,18 +213,33 @@ class EmployeeRepository:
             emergency_contact_phone=emp.emergency_contact_phone
         )
 
-    def delete(self, employee_id: int):
-        emp = EmployeeModel.objects.get(id=employee_id)
+    def delete(self, employee_no: int):
+        emp = EmployeeModel.objects.get(id=employee_no)
         emp.is_deleted = True
         emp.save()
 
-    def get(self, employee_id: int) -> Optional[Employee]:
-        emp = EmployeeModel.objects.filter(id=employee_id, is_deleted=False).select_related('user').first()
+    def get_by_id(self, id: int) -> Optional[Employee]:
+        emp = EmployeeModel.objects.filter(id=id, is_deleted=False).select_related('user').first()
+        return self._to_entity(emp)
+
+    def get_by_username(self, username: str) -> Optional[Employee]:
+        emp = EmployeeModel.objects.filter(user__username=username, is_deleted=False).select_related('user').first()
+        return self._to_entity(emp)
+
+    def get_by_employee_no(self, employee_no: str) -> Optional[Employee]:
+        emp = EmployeeModel.objects.filter(employee_no=employee_no, is_deleted=False).select_related('user').first()
+        return self._to_entity(emp)
+    
+    def get_by_email(self, email: str) -> Optional[Employee]:
+        emp = EmployeeModel.objects.filter(email=email, is_deleted=False).select_related('user').first()
+        return self._to_entity(emp)
+
+    def _to_entity(self, emp) -> Optional[Employee]:
         if not emp:
             return None
         return Employee(
             id=emp.id,
-            employee_id=emp.employee_id,
+            employee_no=emp.employee_no,
             employee_name=emp.employee_name,
             gender=emp.gender,
             username=getattr(emp.user, 'username', None) if hasattr(emp, 'user') and emp.user else None,
@@ -226,7 +269,7 @@ class EmployeeRepository:
         return [
             Employee(
                 id=e.id,
-                employee_id=e.employee_id,
+                employee_no=e.employee_no,
                 employee_name=e.employee_name,
                 gender=e.gender,
                 username=getattr(e.user, 'username', None) if hasattr(e, 'user') and e.user else None,
