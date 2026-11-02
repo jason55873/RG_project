@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms import inlineformset_factory, modelformset_factory
@@ -12,14 +13,8 @@ from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import viewsets
 from .serializers import SupplierSerializer, SupplierCategorySerializer, CurrencySerializer, AddressSerializer
-
-
-
-
 from .forms import (
     EmployeeForm,
-    EmployeeProfileForm,
-    EmployeeContactForm,
     DepartmentForm,
     WarehouseForm,
     ProductCategoryForm,
@@ -29,97 +24,105 @@ from .forms import (
     SupplierCategoryForm,
     AddressForm,
     CustomerCategoryForm,
-    CustomerForm
+    CustomerForm,
+    RequiredDetailFormSet,
+    ProductDetailForm
 )
 
-# 員工 Employee CRUD 視圖
+#員工
+@login_required
+@permission_required('common.view_employee', raise_exception=True)
+def employeesPage(request):
+    return render(request, 'employees/employees_list.html')
+
 
 @login_required
 @permission_required('common.view_employee', raise_exception=True)
-def employee_list(request):
+def listEmployeesAjax(request):
+    employees = Employee.objects.filter(is_deleted=False).values('id', 'employee_no', 'name_chinese', 'name_english', 'profile__department__name', 'profile__title_chinese', 'user__username')
+    return JsonResponse(list(employees), safe=False)
 
-    employees = Employee.objects.filter(is_deleted=False)
-    return render(request, 'employees/employee_list.html', {'employees': employees})
 
-@login_required
-@permission_required('common.add_employee', raise_exception=True)
-def employee_create(request):
-    username = request.POST.get('username', '') if request.method == 'POST' else ''
-    if request.method == 'POST':
-        last_emp = Employee.objects.order_by('-id').first()
-        if last_emp:
-            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
-        else:
-            next_emp_id = "001"
+# @login_required
+# @permission_required('common.add_employee', raise_exception=True)
+# def createEmpolyeeAjax(request):
+#     username = request.POST.get('username', '') if request.method == 'POST' else ''
+#     if request.method == 'POST':
+#         last_emp = Employee.objects.order_by('-id').first()
+#         if last_emp:
+#             next_emp_id = f"{int(last_emp.employee_no) + 1:03d}"
+#         else:
+#             next_emp_id = "001"
 
-        form = EmployeeForm(request.POST)
-        form.fields['employee_id'].widget.attrs['readonly'] = True
-        profile_form = EmployeeProfileForm(request.POST)
-        contact_form = EmployeeContactForm(request.POST)
-        if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
-            employee = form.save(commit=False)
-            employee.employee_id = next_emp_id
-            employee.save()
-            profile = profile_form.save(commit=False)
-            profile.employee = employee
-            profile.save()
-            contact = contact_form.save(commit=False)
-            contact.employee = employee
-            contact.save()
-            # 建立對應 User 帳號
-            user = User.objects.create_user(
-                username=username,
-                first_name=employee.name_chinese,
-                password=employee.employee_id  # 預設密碼為員工編號，可改為亂數或表單輸入
-            )
-            employee.user = user
-            employee.save()
-            return redirect('employee_list')
-    else:
-        last_emp = Employee.objects.order_by('-id').first()
-        if last_emp:
-            next_emp_id = f"{int(last_emp.employee_id) + 1:03d}"
-        else:
-            next_emp_id = "001"
+#         form = EmployeeForm(request.POST)
+#         form.fields['employee_no'].widget.attrs['readonly'] = True
+#         profile_form = EmployeeProfileForm(request.POST)
+#         contact_form = EmployeeContactForm(request.POST)
+#         if form.is_valid() and profile_form.is_valid() and contact_form.is_valid() and username:
+#             employee = form.save(commit=False)
+#             employee.employee_no = next_emp_id
+#             employee.save()
+#             profile = profile_form.save(commit=False)
+#             profile.employee = employee
+#             profile.save()
+#             contact = contact_form.save(commit=False)
+#             contact.employee = employee
+#             contact.save()
+#             # 建立對應 User 帳號
+#             user = User.objects.create_user(
+#                 username=username,
+#                 first_name=employee.name_chinese,
+#                 password=employee.employee_no  # 預設密碼為員工編號，可改為亂數或表單輸入
+#             )
+#             employee.user = user
+#             employee.save()
+#             return redirect('employeesPage')
+#     else:
+#         last_emp = Employee.objects.order_by('-id').first()
+#         if last_emp:
+#             next_emp_id = f"{int(last_emp.employee_no) + 1:03d}"
+#         else:
+#             next_emp_id = "001"
 
-        form = EmployeeForm(initial={'employee_id': next_emp_id})
-        form.fields['employee_id'].widget.attrs['readonly'] = True
-        profile_form = EmployeeProfileForm()
-        contact_form = EmployeeContactForm()
-    return render(request, 'employees/employee_form.html', {
-        'form': form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
-        'username': username,
-    })
+#         form = EmployeeForm(initial={'employee_no': next_emp_id})
+#         form.fields['employee_no'].widget.attrs['readonly'] = True
+#         form.fields['employee_no'].widget.attrs['class'] = 'form-control-plaintext'
+#         profile_form = EmployeeProfileForm()
+#         contact_form = EmployeeContactForm()
+#     return render(request, 'employees/employee_form.html', {
+#         'form': form,
+#         'profile_form': profile_form,
+#         'contact_form': contact_form,
+#         'username': username,
+#     })
 
-@login_required
-@permission_required('common.change_employee', raise_exception=True)
-def employee_update(request, pk):
-    employee = get_object_or_404(Employee, pk=pk)
-    profile = getattr(employee, 'profile', None)
-    contact = getattr(employee, 'contact', None)
-    username = employee.user.username if employee.user else ''
+# @login_required
+# @permission_required('common.change_employee', raise_exception=True)
+# def employee_update(request, pk):
+#     employee = get_object_or_404(Employee, pk=pk)
+#     profile = getattr(employee, 'profile', None)
+#     contact = getattr(employee, 'contact', None)
+#     username = employee.user.username if employee.user else ''
 
-    if request.method == 'POST':
-        form = EmployeeForm(request.POST, instance=employee)
-        profile_form = EmployeeProfileForm(request.POST, instance=profile)
-        contact_form = EmployeeContactForm(request.POST, instance=contact)
-        if form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
-            form.save()
-            profile_form.save()
-            contact_form.save()
-            return redirect('employee_list')
-    else:
-        form = EmployeeForm(instance=employee)
-        profile_form = EmployeeProfileForm(instance=profile)
-        contact_form = EmployeeContactForm(instance=contact)
-    return render(request, 'employees/employee_form.html', {
-        'form': form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
-        'username': username,
-    })
+#     if request.method == 'POST':
+#         form = EmployeeForm(request.POST, instance=employee)
+#         profile_form = EmployeeProfileForm(request.POST, instance=profile)
+#         contact_form = EmployeeContactForm(request.POST, instance=contact)
+#         if form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
+#             form.save()
+#             profile_form.save()
+#             contact_form.save()
+#             return redirect('employeesPage')
+#     else:
+#         form = EmployeeForm(instance=employee)
+#         profile_form = EmployeeProfileForm(instance=profile)
+#         contact_form = EmployeeContactForm(instance=contact)
+#     return render(request, 'employees/employee_form.html', {
+#         'form': form,
+#         'profile_form': profile_form,
+#         'contact_form': contact_form,
+#         'username': username,
+#     })
 
 
 @login_required
@@ -132,25 +135,34 @@ def employee_delete(request, pk):
         if employee.user:
             employee.user.is_active = False
             employee.user.save()
-        return redirect('employee_list')
+        return redirect('employeesPage')
     return render(request, 'employees/employee_confirm_delete.html', {'employee': employee})
 
 def custom_login(request):
+    next_url = request.POST.get('next') or request.GET.get('next') or 'home'
+    if request.user.is_authenticated:
+        return redirect(next_url)
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("home")  # 登入成功後導向首頁（請依實際頁面修改）
+            return redirect(next_url)
         else:
             messages.error(request, "帳號或密碼錯誤")
-    return render(request, "login.html")
-
+    return render(request, "login.html", {"next": next_url})
 
 def logout_view(request):
     logout(request)
     return redirect('login')  # 登出後導回登入頁
+
+
+def custom_404_view(request, exception):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        return redirect('login')
 
 # 部門 Department CRUD 視圖
 
@@ -392,6 +404,7 @@ def productcategory_delete(request, pk):
 @permission_required('common.view_product', raise_exception=True)
 def product_list(request):
     query = request.GET.get('q', '')
+    field = request.GET.get('field', 'all')
     if 'page_size' in request.GET:
         try:
             request.session['page_size'] = int(request.GET.get('page_size'))
@@ -401,11 +414,21 @@ def product_list(request):
 
     product_qs = Product.objects.filter(is_deleted=False)
     if query:
-        product_qs = product_qs.filter(
-            Q(code__icontains=query) |
-            Q(name__icontains=query) |
-            Q(customer_barcode__icontains=query)
-        )
+        if field == 'code':
+            product_qs = product_qs.filter(code__icontains=query)
+        elif field == 'name':
+            product_qs = product_qs.filter(name__icontains=query)
+        elif field == 'customer_barcode':
+            product_qs = product_qs.filter(customer_barcode__icontains=query)
+        elif field == 'barcode':
+            product_qs = product_qs.filter(barcode__icontains=query)
+        else:
+            product_qs = product_qs.filter(
+                Q(code__icontains=query) |
+                Q(name__icontains=query) |
+                Q(customer_barcode__icontains=query)|
+                Q(barcode__icontains=query)
+            )
 
     paginator = Paginator(product_qs.order_by('code'), page_size)
     page = request.GET.get('page')
@@ -421,8 +444,11 @@ def product_list(request):
 # Inline formset for ProductDetail
 ProductDetailFormSet = inlineformset_factory(
     Product, ProductDetail,
-    fields=["id","code_suffix", "value"],
-    extra=0
+    form=ProductDetailForm,
+    fields=["id","barcode","code_suffix", "value"],
+    formset=RequiredDetailFormSet,
+    extra=0,
+    min_num=1,
 )
 
 @login_required
@@ -435,6 +461,11 @@ def product_create(request):
         form.fields['currency'].queryset = Currency.objects.filter(is_deleted=False)
         formset = ProductDetailFormSet(request.POST, instance=product)
         if form.is_valid() and formset.is_valid():
+            # 檢查未被刪除的表單數量
+            not_deleted = [f for f in formset.forms if not f.cleaned_data.get('DELETE', False)]
+            valid_count = sum(1 for f in not_deleted if f.cleaned_data.get('barcode'))
+            if valid_count == 0:
+                formset.non_form_errors = lambda: ["至少要有一筆商品型號且條碼必填"]
             product = form.save()
             formset.instance = product
             formset.save()
@@ -461,6 +492,11 @@ def product_update(request, pk):
         form.fields['currency'].queryset = Currency.objects.filter(is_deleted=False)
         formset = ProductDetailFormSet(request.POST, instance=product)
         if form.is_valid() and formset.is_valid():
+            # 檢查未被刪除的表單數量
+            not_deleted = [f for f in formset.forms if not f.cleaned_data.get('DELETE', False)]
+            valid_count = sum(1 for f in not_deleted if f.cleaned_data.get('barcode'))
+            if valid_count == 0:
+                formset.non_form_errors = lambda: ["至少要有一筆商品型號且條碼必填"]
             product = form.save()
             formset.save()
             return redirect('product_list')
@@ -488,7 +524,7 @@ def product_delete(request, pk):
 
 
 # 貨幣 Currency CRUD 視圖
-CurrencyForm = modelform_factory(Currency, exclude=[])
+CurrencyForm = modelform_factory(Currency, exclude=['is_deleted'])
 
 @login_required
 @permission_required('common.view_currency', raise_exception=True)
@@ -548,11 +584,14 @@ def product_list_api(request):
             products_qs = products_qs.filter(name__icontains=query)
         elif field == 'customer_barcode':
             products_qs = products_qs.filter(customer_barcode__istartswith=query)
+        elif field == 'barcode':
+            products_qs = products_qs.filter(details__barcode=query)
         else:
             products_qs = products_qs.filter(
                 Q(code__icontains=query) |
                 Q(name__icontains=query) |
-                Q(customer_barcode__icontains=query)
+                Q(customer_barcode__icontains=query)|
+                Q(details__barcode__icontains=query)
             )
 
     paginator = Paginator(products_qs.order_by('code'), page_size)
@@ -572,7 +611,7 @@ def product_list_api(request):
             'unit': p.unit,
             'msrp': str(p.msrp),
             'currency': p.currency.short_name if p.currency else '',
-            'barcode': p.barcode,
+            'barcode': "\n".join(filter(None, p.details.all().values_list('barcode', flat=True)))
         })
 
     return JsonResponse({

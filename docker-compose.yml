@@ -14,8 +14,8 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: RG
-      POSTGRES_USER: jason_chen
-      POSTGRES_PASSWORD: J@son55879
+      POSTGRES_USER: user1
+      POSTGRES_PASSWORD: 123
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

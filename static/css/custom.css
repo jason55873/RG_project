@@ -9,6 +9,15 @@
   margin-top: -1px;
 }
 
+ul.dropdown-menu.dropdown-menu {
+  margin: 0;
+  padding: 5px 0;
+  list-style: none;
+  width: auto;
+  min-width: unset;
+  white-space: nowrap;
+}
+
 /* 讓 readonly 欄位有灰底視覺效果 */
 input[readonly],
 input[readonly="readonly"] {
@@ -26,4 +35,8 @@ label.required:before {
 /* 隱藏 Django formset 刪除用的 checkbox */
 input[type="checkbox"][name$="DELETE"] {
   display: none;
+}
+
+.min-vh-60 {
+  min-height: 60vh;
 }

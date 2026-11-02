@@ -1,9 +1,8 @@
 from decimal import Decimal
 from django import forms
+from django.forms import BaseInlineFormSet
 from .models import (
     Employee,
-    EmployeeProfile,
-    EmployeeContact,
     Department,
     Warehouse,
     ProductCategory,
@@ -13,23 +12,48 @@ from .models import (
     SupplierCategory,
     Address,
     CustomerCategory,
-    Customer
+    Customer,
+    ProductDetail
 )
 
-class EmployeeForm(forms.ModelForm):
+class BootstrapMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            # 保留現有的 attrs，只更新 class
+            existing_class = field.widget.attrs.get('class', '')
+            
+            if getattr(field.widget, 'input_type', None) == 'select' or field.widget.__class__.__name__ in ['Select', 'SelectMultiple']:
+                new_class = 'form-select'
+            else:
+                new_class = 'form-control'
+            
+            # 合併 class，但保留其他所有 attributes（如 type: 'date'）
+            if existing_class:
+                field.widget.attrs['class'] = f"{existing_class} {new_class}".strip()
+            else:
+                field.widget.attrs['class'] = new_class
+
+
+class EmployeeForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Employee
         exclude = ['user', 'is_deleted']
 
-class EmployeeProfileForm(forms.ModelForm):
-    class Meta:
-        model = EmployeeProfile
-        exclude = ['employee']
+# class EmployeeProfileForm(BootstrapMixin, forms.ModelForm):
+#     class Meta:
+#         model = EmployeeProfile
+#         exclude = ['employee']
+#         # widgets = {
+#         #     'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+#         #     'hire_date': forms.DateInput(attrs={'type': 'date'}),
+#         #     'resignation_date': forms.DateInput(attrs={'type': 'date'}),
+#         # }   
 
-class EmployeeContactForm(forms.ModelForm):
-    class Meta:
-        model = EmployeeContact
-        exclude = ['employee']
+# class EmployeeContactForm(BootstrapMixin, forms.ModelForm):
+#     class Meta:
+#         model = EmployeeContact
+#         exclude = ['employee']
 
 class DepartmentForm(forms.ModelForm):
     class Meta:
@@ -97,3 +121,23 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = '__all__'
+
+class RequiredDetailFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        valid_count = 0
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            if form.cleaned_data.get('barcode'):
+                valid_count += 1
+        if valid_count == 0:
+            raise forms.ValidationError("至少要有一筆商品型號且條碼必填")
+        
+class ProductDetailForm(forms.ModelForm):
+    class Meta:
+        model = ProductDetail
+        fields = ["id", "barcode", "code_suffix", "value"]
+        widgets = {
+            "barcode": forms.TextInput(attrs={"required": "required"}),
+        }
